@@ -282,7 +282,6 @@ while ($line = fgets(STDIN)) {
 
         $xw->startElement('program');
         $xw->writeAttribute('language', 'IPPcode22');
-        $xw->endElement();
         continue;
     }
 
@@ -292,5 +291,6 @@ while ($line = fgets(STDIN)) {
 if (!$header)
     error(ErrorCode::INVALID_HEADER, "Input was empty");
 
+$xw->endElement();
 $xw->endDocument();
 echo $xw->outputMemory();
