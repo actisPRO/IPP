@@ -182,6 +182,40 @@ function validateVariableName(string $value): void
 }
 
 /**
+ * Checks if the specified type name is valid (int, string or bool)
+ * @param string $value Type name to check
+ */
+function validateTypeName(string $value): void
+{
+    global $lineIndex;
+    if ($value != 'int' && $value != 'string' && $value != 'bool')
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected type to be int, string or bool, but got '$value'");
+}
+
+/**
+ * Checks if the specified frame name is correct (GF, TF or LF)
+ * @param string $value Frame name to check
+ */
+function validateFrameName(string $value): void
+{
+    global $lineIndex;
+
+    if ($value != 'GF' && $value != 'TF' && $value != 'LF')
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected frame to be GF, TF or LF, but got '$value'");
+}
+
+/**
+ * Checks if the specified constant value matches the specified type
+ * @param string $value Constant value
+ * @param ArgType $expectedType Constant type
+ */
+function validateSymbolValue(string $value, ArgType $expectedType)
+{
+    global $lineIndex;
+    // TODO
+}
+
+/**
  * Parses argument, checks if it is correct and returns its type and value
  * @param string $arg Argument to parse
  * @param ArgType $argType Expected argument type
@@ -198,13 +232,24 @@ function parseArgument(string $arg, ArgType $argType): array
     }
 
     if ($argType == ArgType::TYPE) {
-        if ($arg != 'int' && $arg != 'string' && $arg != 'bool')
-            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected type to be int, string or bool, but got '$arg'");
-
+        validateTypeName($arg);
         return array('type' => $argType, 'val' => $arg);
     }
 
     if ($argType == ArgType::VAR) {
+        $separatorPos = strpos($arg, '@');
+        if ($separatorPos == null)
+            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$arg' to be a variable");
+        if ($separatorPos == 0)
+            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: missing frame name in '$arg'");
+        if ($separatorPos == strlen($arg) - 1)
+            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: missing variable name in '$arg'");
+
+        $frame = substr($arg, 0, $separatorPos);
+        validateFrameName($frame);
+        $varName = substr($arg, $separatorPos + 1, strlen($arg) - 1);
+        validateVariableName($varName);
+
         return array('type' => $argType, 'val' => $arg);
     }
 
