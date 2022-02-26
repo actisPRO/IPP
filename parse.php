@@ -190,14 +190,14 @@ function validateVariableName(string $value): void
 }
 
 /**
- * Checks if the specified type name is valid (int, string or bool)
+ * Checks if the specified type name is valid (int, string, bool or nil)
  * @param string $value Type name to check
  */
 function validateTypeName(string $value): void
 {
     global $lineIndex;
-    if ($value != 'int' && $value != 'string' && $value != 'bool')
-        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected type to be int, string or bool, but got '$value'");
+    if ($value != 'int' && $value != 'string' && $value != 'bool' && $value != 'nil')
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected type, but got '$value'");
 }
 
 /**
@@ -209,7 +209,7 @@ function validateFrameName(string $value): void
     global $lineIndex;
 
     if ($value != 'GF' && $value != 'TF' && $value != 'LF')
-        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected frame to be GF, TF or LF, but got '$value'");
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected frame,, but got '$value'");
 }
 
 /**
@@ -217,10 +217,26 @@ function validateFrameName(string $value): void
  * @param string $value Constant value
  * @param ArgType $expectedType Constant type
  */
-function validateSymbolValue(string $value, ArgType $expectedType)
+function validateConstantValue(string $value, ArgType $expectedType)
 {
     global $lineIndex;
-    // TODO
+
+    switch ($expectedType) {
+        case ArgType::NIL:
+            if ($value != 'nil')
+                error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be nil.");
+            break;
+        case ArgType::BOOL:
+            if ($value != 'true' && $value != 'false')
+                error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be bool.");
+            break;
+        case ArgType::INT:
+            if (!preg_match("/^[+-]?[\d]+$/", $value))
+                error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be int.");
+            break;
+        default:
+            error(ErrorCode::INTERNAL_ERROR, "Line $lineIndex: unexpected type while validating constant.");
+    }
 }
 
 /**
