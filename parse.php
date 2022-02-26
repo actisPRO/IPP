@@ -277,9 +277,9 @@ function validateFrameName(string $value): void
 
 /**
  * @param string $value
- * @return void
+ * @return array Array with type and val fields.
  */
-function validateSymbol(string $value): void
+function validateSymbol(string $value): array
 {
     global $lineIndex;
 
@@ -293,8 +293,10 @@ function validateSymbol(string $value): void
         validateTypeName($type);
         $constValue = substr($value, $separatorPos + 1, strlen($value));
         validateConstantValue($constValue, strToArgType($type));
+        return array('type' => $type, 'val' => $constValue);
     } else {
         validateVariable($value);
+        // TODO return
     }
 }
 
@@ -329,6 +331,16 @@ function validateConstantValue(string $value, ArgType $expectedType)
 }
 
 /**
+ * Converts a string from IPPcode22 format to XML format
+ * @param string $ippStr IPPcode22-formatted string
+ * @return string XML string
+ */
+function convertToXMLString(string $ippStr): string
+{
+    // TODO: implement this method
+}
+
+/**
  * Parses argument, checks if it is correct and returns its type and value
  * @param string $arg Argument to parse
  * @param ArgType $argType Expected argument type
@@ -336,16 +348,24 @@ function validateConstantValue(string $value, ArgType $expectedType)
  */
 function parseArgument(string $arg, ArgType $argType): array
 {
+    $retType = $argType;
+    $retVal = $arg;
     if ($argType == ArgType::LABEL)
         validateVariableName($arg);
     else if ($argType == ArgType::TYPE)
         validateTypeName($arg);
     else if ($argType == ArgType::VAR)
         validateVariable($arg);
-    else if ($argType == ArgType::SYMBOL)
-        validateSymbol($arg);
+    else if ($argType == ArgType::SYMBOL) {
+        $symbolData = validateSymbol($arg);
 
-    return array('type' => $argType, 'val' => $arg);
+        $retType = $symbolData['type'];
+        $retVal = $symbolData['val'];
+
+        $retVal = convertToXMLString($retVal);
+    }
+
+    return array('type' => $retType, 'val' => $retVal);
 }
 
 /**
