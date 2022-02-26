@@ -45,7 +45,7 @@ enum InstructionArgType
 }
 
 /**
- * Possible types of arguments
+ * Types of instruction arguments
  */
 enum ArgType: string
 {
@@ -57,6 +57,30 @@ enum ArgType: string
     case LABEL = 'label';
     case SYMBOL = 'symbol';
     case TYPE = 'type';
+}
+
+function strToArgType(string $str): ArgType|null
+{
+    return match ($str) {
+        'var' => ArgType::VAR,
+        'nil' => ArgType::NIL,
+        'int' => ArgType::INT,
+        'bool' => ArgType::BOOL,
+        'string' => ArgType::STRING,
+        'label' => ArgType::LABEL,
+        'symbol' => ArgType::SYMBOL,
+        'type' => ArgType::TYPE,
+        default => null
+    };
+}
+
+/**
+ * Types of symbols
+ */
+enum SymbolType
+{
+    case CONST;
+    case VAR;
 }
 
 /**
@@ -122,6 +146,22 @@ function getArgTypes(InstructionArgType $instructionArgType): array
         InstructionArgType::LABEL_SYM_SYM => array(ArgType::LABEL, ArgType::SYMBOL, ArgType::SYMBOL),
         default => array(),
     };
+}
+
+/**
+ * @param string $symbol
+ * @return SymbolType|null
+ */
+function getSymbolType(string $symbol): SymbolType|null
+{
+    $separatorPos = strpos($symbol, '@');
+    if ($separatorPos == null) return null;
+
+    $left = substr($symbol, 0, $separatorPos);
+    if ($left == 'GF' || $left == 'TF' || $left == 'LF')
+        return SymbolType::VAR;
+    else
+        return SymbolType::CONST;
 }
 
 /**
@@ -201,6 +241,29 @@ function validateTypeName(string $value): void
 }
 
 /**
+ * @param string $var
+ * @param int $lineIndex
+ * @return void
+ */
+function validateVariable(string $var): void
+{
+    global $lineIndex;
+
+    $separatorPos = strpos($var, '@');
+    if ($separatorPos == null)
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$var' to be a variable");
+    if ($separatorPos == 0)
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: missing frame name in '$var'");
+    if ($separatorPos == strlen($var) - 1)
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: missing variable name in '$var'");
+
+    $frame = substr($var, 0, $separatorPos);
+    validateFrameName($frame);
+    $varName = substr($var, $separatorPos + 1, strlen($var));
+    validateVariableName($varName);
+}
+
+/**
  * Checks if the specified frame name is correct (GF, TF or LF)
  * @param string $value Frame name to check
  */
@@ -209,7 +272,30 @@ function validateFrameName(string $value): void
     global $lineIndex;
 
     if ($value != 'GF' && $value != 'TF' && $value != 'LF')
-        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected frame,, but got '$value'");
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected frame, but got '$value'");
+}
+
+/**
+ * @param string $value
+ * @return void
+ */
+function validateSymbol(string $value): void
+{
+    global $lineIndex;
+
+    $symbolType = getSymbolType($value);
+    if ($symbolType == null)
+        error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected symbol, but got '$value'");
+
+    $separatorPos = strpos($value, '@');
+    if ($symbolType == SymbolType::CONST) {
+        $type = substr($value, 0, $separatorPos);
+        validateTypeName($type);
+        $constValue = substr($value, $separatorPos + 1, strlen($value));
+        validateConstantValue($constValue, strToArgType($type));
+    } else {
+        validateVariable($value);
+    }
 }
 
 /**
@@ -234,6 +320,9 @@ function validateConstantValue(string $value, ArgType $expectedType)
             if (!preg_match("/^[+-]?[\d]+$/", $value))
                 error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be int.");
             break;
+        case ArgType::STRING:
+            //TODO
+            break;
         default:
             error(ErrorCode::INTERNAL_ERROR, "Line $lineIndex: unexpected type while validating constant.");
     }
@@ -247,41 +336,16 @@ function validateConstantValue(string $value, ArgType $expectedType)
  */
 function parseArgument(string $arg, ArgType $argType): array
 {
-    global $lineIndex;
-
-    $result = array();
-    if ($argType == ArgType::LABEL) {
+    if ($argType == ArgType::LABEL)
         validateVariableName($arg);
-        return array('type' => $argType, 'val' => $arg);
-    }
-
-    if ($argType == ArgType::TYPE) {
+    else if ($argType == ArgType::TYPE)
         validateTypeName($arg);
-        return array('type' => $argType, 'val' => $arg);
-    }
+    else if ($argType == ArgType::VAR)
+        validateVariable($arg);
+    else if ($argType == ArgType::SYMBOL)
+        validateSymbol($arg);
 
-    if ($argType == ArgType::VAR) {
-        $separatorPos = strpos($arg, '@');
-        if ($separatorPos == null)
-            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$arg' to be a variable");
-        if ($separatorPos == 0)
-            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: missing frame name in '$arg'");
-        if ($separatorPos == strlen($arg) - 1)
-            error(ErrorCode::PARSER_ERROR, "Line $lineIndex: missing variable name in '$arg'");
-
-        $frame = substr($arg, 0, $separatorPos);
-        validateFrameName($frame);
-        $varName = substr($arg, $separatorPos + 1, strlen($arg) - 1);
-        validateVariableName($varName);
-
-        return array('type' => $argType, 'val' => $arg);
-    }
-
-    if ($argType == ArgType::SYMBOL) {
-        return array('type' => $argType, 'val' => $arg);
-    }
-
-    return array();
+    return array('type' => $argType, 'val' => $arg);
 }
 
 /**
