@@ -293,10 +293,10 @@ function validateSymbol(string $value): array
         validateTypeName($type);
         $constValue = substr($value, $separatorPos + 1, strlen($value));
         validateConstantValue($constValue, strToArgType($type));
-        return array('type' => $type, 'val' => $constValue);
+        return array('type' => strToArgType($type), 'val' => $constValue);
     } else {
         validateVariable($value);
-        // TODO return
+        return array('type' => ArgType::VAR, 'val' => $value);
     }
 }
 
@@ -323,21 +323,11 @@ function validateConstantValue(string $value, ArgType $expectedType)
                 error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be int.");
             break;
         case ArgType::STRING:
-            //TODO
+            // Error isn't possible here as string can contain any chars except for special ones, but they are controlled in other places
             break;
         default:
             error(ErrorCode::INTERNAL_ERROR, "Line $lineIndex: unexpected type while validating constant.");
     }
-}
-
-/**
- * Converts a string from IPPcode22 format to XML format
- * @param string $ippStr IPPcode22-formatted string
- * @return string XML string
- */
-function convertToXMLString(string $ippStr): string
-{
-    // TODO: implement this method
 }
 
 /**
@@ -361,8 +351,6 @@ function parseArgument(string $arg, ArgType $argType): array
 
         $retType = $symbolData['type'];
         $retVal = $symbolData['val'];
-
-        $retVal = convertToXMLString($retVal);
     }
 
     return array('type' => $retType, 'val' => $retVal);
