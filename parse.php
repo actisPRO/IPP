@@ -9,13 +9,9 @@
 
 ini_set('display_errors', 'stderr');
 
+$header = false;
 $instructionOrder = 1;
 $lineIndex = 0;
-
-$xw = new XMLWriter();
-$xw->openMemory();
-$xw->setIndent(true);
-$xw->startDocument('1.0', 'UTF-8');
 
 /**
  * Parser error codes
@@ -149,8 +145,9 @@ function getArgTypes(InstructionArgType $instructionArgType): array
 }
 
 /**
- * @param string $symbol
- * @return SymbolType|null
+ * Gets symbol type
+ * @param string $symbol Symbol
+ * @return SymbolType|null Type of the symbol (var/const) or null if value is not a symbol
  */
 function getSymbolType(string $symbol): SymbolType|null
 {
@@ -166,7 +163,6 @@ function getSymbolType(string $symbol): SymbolType|null
 
 /**
  * Prints the help message
- * @return void
  */
 function printHelp()
 {
@@ -193,7 +189,7 @@ function error(ErrorCode $code, string $message)
  * @param array $argv Command line arguments
  * @return void
  */
-function parse_cli_args(int $argc, array $argv)
+function parseCLIArgs(int $argc, array $argv)
 {
     if ($argc >= 2) {
         if ($argc == 2 && $argv[1] == '--help') {
@@ -241,9 +237,8 @@ function validateTypeName(string $value): void
 }
 
 /**
- * @param string $var
- * @param int $lineIndex
- * @return void
+ * Validates a variable
+ * @param string $var Variable to validate
  */
 function validateVariable(string $var): void
 {
@@ -276,7 +271,8 @@ function validateFrameName(string $value): void
 }
 
 /**
- * @param string $value
+ * Validates symbol and determines its type and value
+ * @param string $value Symbol to validate
  * @return array Array with type and val fields.
  */
 function validateSymbol(string $value): array
@@ -357,12 +353,12 @@ function parseArgument(string $arg, ArgType $argType): array
 }
 
 /**
- * @param int $argIndex
- * @param ArgType $argType
- * @param $argVal
- * @return void
+ * Writes argument information to XML
+ * @param int $argIndex Argument index (1-3)
+ * @param ArgType $argType Argument type
+ * @param mixed $argVal Argument value
  */
-function writeArgInfo(int $argIndex, ArgType $argType, $argVal)
+function writeArgInfo(int $argIndex, ArgType $argType, mixed $argVal)
 {
     global $xw;
     $xw->startElement("arg$argIndex");
@@ -372,10 +368,10 @@ function writeArgInfo(int $argIndex, ArgType $argType, $argVal)
 }
 
 /**
- * @param $instruction
- * @return void
+ * Validates opcode, argument count, initiates argument validations and writes information to XML
+ * @param array $instruction Instruction without comments and separated by white-chars
  */
-function parseInstruction($instruction)
+function validateInstruction(array $instruction)
 {
     global $instructionOrder, $lineIndex, $xw;
 
@@ -404,31 +400,43 @@ function parseInstruction($instruction)
     $xw->endElement();
 }
 
-parse_cli_args($argc, $argv);
+/**
+ * Reads input from stdin and parses it.
+ */
+function parseInput()
+{
+    global $header, $lineIndex, $xw;
 
-$header = false;
+    while ($line = fgets(STDIN)) {
+        $lineIndex += 1;
+        if ($line == '\n' || $line[0] == '#') continue;
 
-while ($line = fgets(STDIN)) {
-    $lineIndex += 1;
-    if ($line == '\n' || $line[0] == '#') continue;
+        $trimmed = trim(trimComment($line));
+        $instruction = preg_split('/\s+/', $trimmed);
 
-    $trimmed = trim(trimComment($line));
-    $instruction = preg_split('/\s+/', $trimmed);
+        $instruction[0] = strtoupper($instruction[0]); // as opcode is case-insensitive
 
-    $instruction[0] = strtoupper($instruction[0]); // as opcode is case-insensitive
+        if (!$header) {
+            if ($instruction[0] == '.IPPCODE22') $header = true;
+            else error(ErrorCode::INVALID_HEADER, "Line $lineIndex: expected header .IPPcode22, but got: $line.");
 
-    if (!$header) {
-        if ($instruction[0] == '.IPPCODE22') $header = true;
-        else error(ErrorCode::INVALID_HEADER, "Line $lineIndex: expected header .IPPcode22, but got: $line.");
+            $xw->startElement('program');
+            $xw->writeAttribute('language', 'IPPcode22');
+            continue;
+        }
 
-        $xw->startElement('program');
-        $xw->writeAttribute('language', 'IPPcode22');
-        continue;
+        validateInstruction($instruction);
     }
-
-    parseInstruction($instruction);
 }
 
+
+$xw = new XMLWriter();
+$xw->openMemory();
+$xw->setIndent(true);
+$xw->startDocument('1.0', 'UTF-8');
+
+parseCLIArgs($argc, $argv);
+parseInput($xw);
 if (!$header)
     error(ErrorCode::INVALID_HEADER, "Input was empty");
 
