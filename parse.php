@@ -433,6 +433,7 @@ function parseInput()
 $xw = new XMLWriter();
 $xw->openMemory();
 $xw->setIndent(true);
+$xw->setIndentString('    ');
 $xw->startDocument('1.0', 'UTF-8');
 
 parseCLIArgs($argc, $argv);
