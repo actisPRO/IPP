@@ -1,5 +1,6 @@
 from argument import Argument
 from context import Context
+from exit_code import ExitCode
 
 
 class Instruction:
@@ -45,12 +46,24 @@ class Instruction:
         return
 
     def createframe(self, ctx: Context):
+        ctx.TF = dict()
         return
 
     def pushframe(self, ctx: Context):
+        if ctx.TF is None:
+            ctx.error('temporary frame is not defined.')
+            exit(ExitCode.UNDEFINED_FRAME.value)
+
+        ctx.LFs.append(ctx.TF)
+        ctx.TF = None
         return
 
     def popframe(self, ctx: Context):
+        if len(ctx.LFs) == 0:
+            ctx.error('local frame stack is empty.')
+            exit(ExitCode.UNDEFINED_FRAME.value)
+
+        ctx.TF = ctx.LFs.pop()
         return
 
     def defvar(self, ctx: Context):
