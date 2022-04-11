@@ -15,9 +15,6 @@ class Instruction:
     def add_arg(self, arg: Argument):
         self.args.append(arg)
 
-    def error(self, message):
-        print(f'ERROR (instruction #{self.order}): {message}', file=sys.stderr)
-
     def execute(self, ctx: Context):
         if self.opcode == 'MOVE':
             self.move(ctx)
@@ -48,8 +45,7 @@ class Instruction:
 
     def defvar(self, ctx: Context):
         data = self.args[0].value.split('@')
-
-
+        ctx.set_variable(data[0], data[1], None, None)
         return
 
     def call(self, ctx: Context):
