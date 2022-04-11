@@ -309,6 +309,16 @@ class Instruction:
         return
 
     def exec_not(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        if sym1.type != 'bool':
+            ctx.error('NOT accepts only a boolean parameter.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        result = sym1.value != 'true'
+        result = str(result).lower()
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'bool', result)
         return
 
     def int2char(self, ctx: Context):
