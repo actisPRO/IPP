@@ -1,3 +1,5 @@
+import sys
+
 from argument import Argument
 from context import Context
 from exit_code import ExitCode
@@ -524,6 +526,8 @@ class Instruction:
         return
 
     def dprint(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[0])
+        print(sym1.value, file=sys.stderr)
         return
 
     def exec_break(self, ctx: Context):
