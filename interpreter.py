@@ -42,9 +42,10 @@ class Interpreter:
 
         if root.tag != 'program':
             print("ERROR: Invalid XML root.", file=sys.stderr)
-            exit(ExitCode.UNEXPECTED_XML)
+            exit(ExitCode.UNEXPECTED_XML.value)
 
         self.sort_xml(root)
+        self.validate_xml(root)
 
         print(root[0].attrib)
 
@@ -54,15 +55,35 @@ class Interpreter:
             root[:] = sorted(root, key=lambda child: int(child.get('order')))
         except Exception as e:
             print(str(e), file=sys.stderr)
-            print("Error while sorting instructions.")
-            exit(ExitCode.UNEXPECTED_XML)
+            print("Unexpected error while sorting instructions.")
+            exit(ExitCode.UNEXPECTED_XML.value)
 
         for child in root:
             try:
                 child[:] = sorted(child, key=lambda child: child.tag)
             except Exception as e:
                 print(str(e) + "\n", file=sys.stderr)
-                print("Error while sorting arguments", file=sys.stderr)
-                exit(32)
+                print("Unexpected error while sorting arguments", file=sys.stderr)
+                exit(ExitCode.UNEXPECTED_XML.value)
+
+    @staticmethod
+    def validate_xml(root):
+        expected_order = 1
+
+        for child in root:
+            if child.tag != 'instruction':
+                print(f'ERROR: Unexpected XML-tag {child.tag}. Expected: instruction', file=sys.stderr)
+                exit(ExitCode.UNEXPECTED_XML.value)
+
+            attributes = list(child.attrib.keys())
+            if not('order' in attributes) or not('opcode' in attributes):
+                print('ERROR: Every instruction should contain opcode and order atrtibutes.', file=sys.stderr)
+                exit(ExitCode.UNEXPECTED_XML.value)
+
+            if int(child.attrib['order']) != expected_order:
+                print(f'Expected order to be {expected_order} but it was {child.attrib["order"]}.', file=sys.stderr)
+                exit(ExitCode.UNEXPECTED_XML.value)
+
+            expected_order += 1
 
 
