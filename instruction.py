@@ -457,6 +457,7 @@ class Instruction:
         return
 
     def jump(self, ctx: Context):
+        ctx.jump_to_label(self.args[0].value)
         return
 
     def jumpifeq(self, ctx: Context):

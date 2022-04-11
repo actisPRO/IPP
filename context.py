@@ -26,8 +26,8 @@ class Context:
     def load_labels(self):
         for i in self.instructions:
             if i.opcode == 'LABEL':
-                if self.labels[i.args[0].value] is not None:
-                    print(f'ERROR: label {i.args[0].value} is defined twice.')
+                if i.args[0].value in self.labels.keys():
+                    print(f'ERROR: label {i.args[0].value} is defined twice.', file=sys.stderr)
                     exit(ExitCode.SEMANTIC_ERROR.value)
 
                 self.labels[i.args[0].value] = int(i.order)
