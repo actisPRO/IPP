@@ -1,7 +1,7 @@
 from argument import Argument
 from context import Context
 from exit_code import ExitCode
-from variable import Variable
+
 
 class Instruction:
     def __init__(self, opcode: str, order: int):
@@ -222,10 +222,7 @@ class Instruction:
         elif sym1.type == 'string':
             result = sym1.value < sym2.value
 
-        if result:
-            result = 'true'
-        else:
-            result = 'false'
+        result = str(result).lower()
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], 'bool', result)
@@ -249,10 +246,7 @@ class Instruction:
         elif sym1.type == 'string':
             result = sym1.value > sym2.value
 
-        if result:
-            result = 'true'
-        else:
-            result = 'false'
+        result = str(result).lower()
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], 'bool', result)
@@ -280,16 +274,24 @@ class Instruction:
         else:
             result = sym1.value == sym2.value
 
-        if result:
-            result = 'true'
-        else:
-            result = 'false'
+        result = str(result).lower()
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], 'bool', result)
         return
 
     def exec_and(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+        if sym1.type != 'bool' or sym2.type != 'bool':
+            ctx.error('AND accepts only boolean parameters.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        result = sym1.value == 'true' and sym2.value == 'true'
+        result = str(result).lower()
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'bool', result)
         return
 
     def exec_or(self, ctx: Context):
