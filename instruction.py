@@ -85,19 +85,10 @@ class Instruction:
             self.exec_break(ctx)
 
     def move(self, ctx: Context):
-        var_type = None
-        value = None
-        if self.args[1].type == 'var':
-            sym_data = self.args[1].value.split('@')
-            sym = ctx.get_variable(sym_data[0], sym_data[1])
-            var_type = sym.type
-            value = sym.value
-        else:
-            var_type = self.args[1].type
-            value = self.args[1].value
+        sym = ctx.get_variable_from_arg(self.args[1])
 
         var_data = self.args[0].value.split('@')
-        ctx.set_variable(var_data[0], var_data[1], var_type, value)
+        ctx.set_variable(var_data[0], var_data[1], sym.type, sym.value)
 
         return
 
@@ -141,16 +132,7 @@ class Instruction:
         return
 
     def pushs(self, ctx: Context):
-        var = Variable(None, None)
-        if self.args[0].type == 'var':
-            sym_data = self.args[0].value.split('@')
-            sym = ctx.get_variable(sym_data[0], sym_data[1])
-            var.type = sym.type
-            var.value = sym.value
-        else:
-            var.type = self.args[0].type
-            var.value = self.args[0].value
-
+        var = ctx.get_variable_from_arg(self.args[0])
         ctx.stack.append(var)
         return
 
@@ -167,6 +149,9 @@ class Instruction:
         return
 
     def add(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+
         return
 
     def sub(self, ctx: Context):
@@ -243,3 +228,4 @@ class Instruction:
 
     def exec_break(self, ctx: Context):
         return
+

@@ -2,6 +2,7 @@ import sys
 
 from exit_code import ExitCode
 from variable import Variable
+from argument import Argument
 
 
 class Context:
@@ -68,6 +69,20 @@ class Context:
                 exit(ExitCode.MISSING_VALUE.value)
 
             return self.TF[name]
+
+    def get_variable_from_arg(self, arg: Argument) -> Variable:
+        var = Variable(None, None)
+        if arg.type == 'var':
+            sym_data = arg.value.split('@')
+            sym = self.get_variable(sym_data[0], sym_data[1])
+            var.type = sym.type
+            var.value = sym.value
+        else:
+            var.type = arg.type
+            var.value = arg.value
+
+        return var
+
 
     def def_var(self, frame: str, name: str):
         var = Variable(None, None)
