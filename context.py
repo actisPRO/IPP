@@ -1,5 +1,7 @@
 from instruction import Instruction
 from exit_code import ExitCode
+from variable import Variable
+
 
 class Context:
     instructions = list()
@@ -48,3 +50,32 @@ class Context:
                 exit(ExitCode.SEMANTIC_ERROR.value)
 
             return self.TF[name]
+
+    def set_variable(self, frame: str, name: str, var_type: str, value: str, caller: Instruction):
+        var = Variable(var_type, value)
+
+        if frame == 'GF':
+            if name in self.GF.keys():
+                caller.error(f'variable {name} is already defined in the global frame.')
+                exit(ExitCode.SEMANTIC_ERROR.value)
+            self.GF[name] = var
+        elif frame == 'LF':
+            if len(self.LFs) == 0:
+                caller.error('local frame does not exist.')
+                exit(ExitCode.UNDEFINED_FRAME.value)
+
+            if name in self.LFs[-1].keys():
+                caller.error(f'variable {name} is already defined in the local frame.')
+                exit(ExitCode.SEMANTIC_ERROR.value)
+
+            self.LFs[-1][name] = var
+        elif frame == 'TF':
+            if self.TF is None:
+                caller.error(f'temporary frame is not defined.')
+                exit(ExitCode.UNDEFINED_FRAME.value)
+
+            if name in self.TF.keys():
+                caller.error(f'variable {name} is already defined in the temporary frame.')
+                exit(ExitCode.SEMANTIC_ERROR.value)
+
+            self.TF[name] = var

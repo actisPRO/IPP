@@ -49,32 +49,7 @@ class Instruction:
     def defvar(self, ctx: Context):
         data = self.args[0].value.split('@')
 
-        var = Variable(None, None)
-        if data[0] == 'GF':
-            if data[1] in ctx.GF.keys():
-                self.error(f'variable {data[1]} is already defined in the global frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
-            ctx.GF[data[1]] = var
-        elif data[0] == 'LF':
-            if len(ctx.LFs) == 0:
-                self.error('local frame does not exist.')
-                exit(ExitCode.UNDEFINED_FRAME.value)
 
-            if data[1] in ctx.LFs[-1].keys():
-                self.error(f'variable {data[1]} is already defined in the local frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
-
-            ctx.LFs[-1][data[1]] = var
-        elif data[0] == 'TF':
-            if ctx.TF is None:
-                self.error(f'temporary frame is not defined.')
-                exit(ExitCode.UNDEFINED_FRAME.value)
-
-            if data[1] in ctx.TF.keys():
-                self.error(f'variable {data[1]} is already defined in the temporary frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
-
-            ctx.TF[data[1]] = var
         return
 
     def call(self, ctx: Context):
