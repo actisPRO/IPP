@@ -330,12 +330,25 @@ class Instruction:
         try:
             result = chr(int(sym1.value))
             var = self.args[0].value.split('@')
-            ctx.set_variable(var[0], var[1], 'int', result)
+            ctx.set_variable(var[0], var[1], 'string', result)
         except ValueError:
             ctx.error(f'{sym1.value} is an incorrect Unicode code.')
-            exit(ExitCode.BAD_STRING)
+            exit(ExitCode.BAD_STRING.value)
 
     def stri2int(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+        if sym1.type != 'string' or sym2.type != 'int':
+            ctx.error('STRI2INT valid signature is VAR STRING INT.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+        if int(sym2.value) < 0 or int(sym2.value) >= len(sym1.value):
+            ctx.error('index is out of range.')
+            exit(ExitCode.BAD_STRING.value)
+
+        char = sym1.value[int(sym2.value)]
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'int', ord(char))
+
         return
 
     def read(self, ctx: Context):

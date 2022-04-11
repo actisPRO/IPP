@@ -106,7 +106,7 @@ function getInstructionArgType(string $opcode): InstructionArgType|null
         'OR' => InstructionArgType::VAR_SYM_SYM,
         'NOT' => InstructionArgType::VAR_SYM,
         'INT2CHAR' => InstructionArgType::VAR_SYM,
-        'STR2INT' => InstructionArgType::VAR_SYM_SYM,
+        'STRI2INT' => InstructionArgType::VAR_SYM_SYM,
         'READ' => InstructionArgType::VAR_TYPE,
         'WRITE' => InstructionArgType::SYM,
         'CONCAT' => InstructionArgType::VAR_SYM_SYM,
