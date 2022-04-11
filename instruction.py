@@ -155,6 +155,15 @@ class Instruction:
         return
 
     def pops(self, ctx: Context):
+        if len(ctx.stack) == 0:
+            ctx.error('Stack is empty.')
+            exit(ExitCode.MISSING_VALUE.value)
+
+        var = ctx.stack.pop()
+
+        var_data = self.args[0].value.split('@')
+        ctx.set_variable(var_data[0], var_data[1], var.type, var.value)
+
         return
 
     def add(self, ctx: Context):
