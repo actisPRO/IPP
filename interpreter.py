@@ -38,7 +38,7 @@ class Interpreter:
             else:
                 self.input_stream = io.open(input_file, 'r')
 
-        self.context = Context()
+        self.context = Context(self.input_stream)
 
     def execute(self):
         self.context.execute()

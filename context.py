@@ -13,9 +13,10 @@ class Context:
     calls = list()
     stack = list()
 
-    def __init__(self):
+    def __init__(self, input_stream):
         self.current_pos = 0
         self.TF = None
+        self.input = input_stream
 
     def execute(self):
         while self.current_pos != len(self.instructions):

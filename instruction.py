@@ -352,6 +352,26 @@ class Instruction:
         return
 
     def read(self, ctx: Context):
+        var = self.args[0].value.split('@')
+        if self.args[1].value == 'int':
+            try:
+                data = int(ctx.input.readline())
+                ctx.set_variable(var[0], var[1], 'int', data)
+            except ValueError:
+                ctx.set_variable(var[0], var[1], 'nil', 'nil')
+        elif self.args[1].value == 'bool':
+            data = ctx.input.readline().lower()
+            if data == 'true' or data == 'true\n':
+                ctx.set_variable(var[0], var[1], 'bool', 'true')
+            else:
+                ctx.set_variable(var[0], var[1], 'bool', 'false')
+        elif self.args[1].value == 'string':
+            data = ctx.input.readline()
+            ctx.set_variable(var[0], var[1], 'string', data)
+        else:
+            ctx.error('READ only accepts integer, boolean and string types.')
+            exit(ExitCode.BAD_OPERAND_VALUE.value)
+
         return
 
     def write(self, ctx: Context):
