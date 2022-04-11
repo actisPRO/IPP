@@ -400,6 +400,16 @@ class Instruction:
         return
 
     def strlen(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        if sym1.type != 'string':
+            ctx.error('STRLEN accepts only a string parameter.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        result = len(sym1.value)
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'int', result)
+
         return
 
     def getchar(self, ctx: Context):
