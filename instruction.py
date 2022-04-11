@@ -153,7 +153,7 @@ class Instruction:
         sym2 = ctx.get_variable_from_arg(self.args[2])
         if sym1.type != 'int' or sym2.type != 'int':
             ctx.error('ADD accepts only integer parameters.')
-            exit(ExitCode.BAD_OPERAND_TYPE)
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
 
         result = int(sym1.value) + int(sym2.value)
 
@@ -167,7 +167,7 @@ class Instruction:
         sym2 = ctx.get_variable_from_arg(self.args[2])
         if sym1.type != 'int' or sym2.type != 'int':
             ctx.error('SUB accepts only integer parameters.')
-            exit(ExitCode.BAD_OPERAND_TYPE)
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
 
         result = int(sym1.value) - int(sym2.value)
 
@@ -180,7 +180,7 @@ class Instruction:
         sym2 = ctx.get_variable_from_arg(self.args[2])
         if sym1.type != 'int' or sym2.type != 'int':
             ctx.error('MUL accepts only integer parameters.')
-            exit(ExitCode.BAD_OPERAND_TYPE)
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
 
         result = int(sym1.value) * int(sym2.value)
 
@@ -193,10 +193,10 @@ class Instruction:
         sym2 = ctx.get_variable_from_arg(self.args[2])
         if sym1.type != 'int' or sym2.type != 'int':
             ctx.error('SUB accepts only integer parameters.')
-            exit(ExitCode.BAD_OPERAND_TYPE)
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
         if int(sym2.value) == 0:
             ctx.error('Can\'t divde by zero.')
-            exit(ExitCode.BAD_OPERAND_VALUE)
+            exit(ExitCode.BAD_OPERAND_VALUE.value)
 
         result = int(sym1.value) // int(sym2.value)
 
@@ -205,6 +205,30 @@ class Instruction:
         return
 
     def lt(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+        if sym1.type != sym2.type:
+            ctx.error('LT only accepts parameters with equal types.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        result = False
+        if sym1.type == 'int':
+            result = int(sym1.value) < int(sym2.value)
+        elif sym1.type == 'bool':
+            if sym1.value == 'false' and sym2.value == 'true':
+                result = True
+            else:
+                result = False
+        elif sym1.type == 'string':
+            result = sym1.value < sym2.value
+
+        if result:
+            result = 'true'
+        else:
+            result = 'false'
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'bool', result)
         return
 
     def gt(self, ctx: Context):
