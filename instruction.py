@@ -199,6 +199,14 @@ class Instruction:
         return
 
     def write(self, ctx: Context):
+        sym = ctx.get_variable_from_arg(self.args[0])
+        if sym.type == 'nil':
+            print('')
+        elif sym.type == 'bool':
+            print(sym.value)
+        else:
+            print(sym.value, end='')
+
         return
 
     def concat(self, ctx: Context):
