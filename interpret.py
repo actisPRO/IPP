@@ -4,7 +4,6 @@ import sys
 from exit_code import ExitCode
 from interpreter import Interpreter
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('interpret.py', add_help=False)
     parser.add_argument('--help', action='help', help='show this help message and exit.')
@@ -18,6 +17,7 @@ if __name__ == '__main__':
 
     try:
         interpreter = Interpreter(args.source, args.input)
+        interpreter.parse_xml()
     except FileNotFoundError:
         print('ERROR: specified file was not found.', file=sys.stderr)
         exit(ExitCode.READ_ERROR.value)
