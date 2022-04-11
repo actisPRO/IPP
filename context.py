@@ -59,27 +59,16 @@ class Context:
         var = Variable(var_type, value)
 
         if frame == 'GF':
-            if name in self.GF.keys():
-                self.error(f'variable {name} is already defined in the global frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
             self.GF[name] = var
         elif frame == 'LF':
             if len(self.LFs) == 0:
                 self.error('local frame does not exist.')
                 exit(ExitCode.UNDEFINED_FRAME.value)
 
-            if name in self.LFs[-1].keys():
-                self.error(f'variable {name} is already defined in the local frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
-
             self.LFs[-1][name] = var
         elif frame == 'TF':
             if self.TF is None:
                 self.error(f'temporary frame is not defined.')
                 exit(ExitCode.UNDEFINED_FRAME.value)
-
-            if name in self.TF.keys():
-                self.error(f'variable {name} is already defined in the temporary frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
 
             self.TF[name] = var
