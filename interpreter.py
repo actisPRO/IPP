@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 class Interpreter:
     xml_tree = None
     input_stream = None
+    context = None
 
     @staticmethod
     def __read_source_from_stdin():
@@ -30,3 +31,9 @@ class Interpreter:
                 raise FileNotFoundError
             else:
                 self.input_stream = io.open(input_file, 'r')
+
+    def parse_xml(self):
+        root = self.xml_tree.getroot()
+        # todo: xml validation
+
+
