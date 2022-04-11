@@ -172,11 +172,7 @@ class Instruction:
             ctx.error('FLOAT2INT accepts only float parameters.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        val = 0
-        try:
-            val = int(float(sym1.value))
-        except ValueError:
-            val = int(float.fromhex(sym1.value))
+        val = sym1.float_value()
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], 'int', val)
@@ -186,57 +182,112 @@ class Instruction:
     def add(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        if sym1.type != 'int' or sym2.type != 'int':
-            ctx.error('ADD accepts only integer parameters.')
+        if (sym1.type != 'int' and sym1.type != 'float') or (sym2.type != 'int' and sym2.type != 'float'):
+            ctx.error('ADD accepts only integer and float parameters.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        result = int(sym1.value) + int(sym2.value)
+        if sym1.type == 'int':
+            val1 = int(sym1.value)
+        else:
+            val1 = sym1.float_value()
+        if sym2.type == 'int':
+            val2 = int(sym2.value)
+        else:
+            val2 = sym2.float_value()
+        result = val1 + val2
+
+        if sym1.type == 'float' or sym2.type == 'float':
+            var_type = 'float'
+        else:
+            var_type = 'int'
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'int', result)
+        ctx.set_variable(var[0], var[1], var_type, result)
 
         return
 
     def sub(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        if sym1.type != 'int' or sym2.type != 'int':
-            ctx.error('SUB accepts only integer parameters.')
+        if (sym1.type != 'int' and sym1.type != 'float') or (sym2.type != 'int' and sym2.type != 'float'):
+            ctx.error('SUB accepts only integer and float parameters.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        result = int(sym1.value) - int(sym2.value)
+        if sym1.type == 'int':
+            val1 = int(sym1.value)
+        else:
+            val1 = sym1.float_value()
+        if sym2.type == 'int':
+            val2 = int(sym2.value)
+        else:
+            val2 = sym2.float_value()
+        result = val1 - val2
+
+        if sym1.type == 'float' or sym2.type == 'float':
+            var_type = 'float'
+        else:
+            var_type = 'int'
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'int', result)
+        ctx.set_variable(var[0], var[1], var_type, result)
+
         return
 
     def mul(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        if sym1.type != 'int' or sym2.type != 'int':
-            ctx.error('MUL accepts only integer parameters.')
+        if (sym1.type != 'int' and sym1.type != 'float') or (sym2.type != 'int' and sym2.type != 'float'):
+            ctx.error('MUL accepts only integer or float parameters.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        result = int(sym1.value) * int(sym2.value)
+        if sym1.type == 'int':
+            val1 = int(sym1.value)
+        else:
+            val1 = sym1.float_value()
+        if sym2.type == 'int':
+            val2 = int(sym2.value)
+        else:
+            val2 = sym2.float_value()
+        result = val1 * val2
+
+        if sym1.type == 'float' or sym2.type == 'float':
+            var_type = 'float'
+        else:
+            var_type = 'int'
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'int', result)
+        ctx.set_variable(var[0], var[1], var_type, result)
+
         return
 
     def idiv(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        if sym1.type != 'int' or sym2.type != 'int':
-            ctx.error('SUB accepts only integer parameters.')
+        if (sym1.type != 'int' and sym1.type != 'float') or (sym2.type != 'int' and sym2.type != 'float'):
+            ctx.error('IDIV accepts only integer or float parameters.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
-        if int(sym2.value) == 0:
+        if float(sym2.value) == 0:
             ctx.error('Can\'t divde by zero.')
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        result = int(sym1.value) // int(sym2.value)
+        if sym1.type == 'int':
+            val1 = int(sym1.value)
+        else:
+            val1 = sym1.float_value()
+        if sym2.type == 'int':
+            val2 = int(sym2.value)
+        else:
+            val2 = sym2.float_value()
+        result = val1 // val2
+
+        if sym1.type == 'float' or sym2.type == 'float':
+            var_type = 'float'
+        else:
+            var_type = 'int'
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'int', result)
+        ctx.set_variable(var[0], var[1], var_type, result)
+
         return
 
     def lt(self, ctx: Context):
