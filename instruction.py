@@ -45,6 +45,8 @@ class Instruction:
             self.mul(ctx)
         elif self.opcode == "IDIV":
             self.idiv(ctx)
+        elif self.opcode == "DIV":
+            self.div(ctx)
         elif self.opcode == "LT":
             self.lt(ctx)
         elif self.opcode == "GT":
@@ -290,6 +292,31 @@ class Instruction:
 
         return
 
+    def div(self, ctx):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+        if (sym1.type != 'int' and sym1.type != 'float') or (sym2.type != 'int' and sym2.type != 'float'):
+            ctx.error('DIV accepts only integer or float parameters.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+        if float(sym2.value) == 0:
+            ctx.error('Can\'t divde by zero.')
+            exit(ExitCode.BAD_OPERAND_VALUE.value)
+
+        if sym1.type == 'int':
+            val1 = int(sym1.value)
+        else:
+            val1 = sym1.float_value()
+        if sym2.type == 'int':
+            val2 = int(sym2.value)
+        else:
+            val2 = sym2.float_value()
+        result = val1 / val2
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'float', result)
+
+        return
+
     def lt(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
@@ -300,6 +327,8 @@ class Instruction:
         result = False
         if sym1.type == 'int':
             result = int(sym1.value) < int(sym2.value)
+        elif sym1.type == 'float':
+            result = sym1.float_value() < sym2.float_value()
         elif sym1.type == 'bool':
             if sym1.value == 'false' and sym2.value == 'true':
                 result = True
@@ -324,6 +353,8 @@ class Instruction:
         result = False
         if sym1.type == 'int':
             result = int(sym1.value) > int(sym2.value)
+        elif sym1.type == 'float':
+            result = sym1.float_value() > sym2.float_value()
         elif sym1.type == 'bool':
             if sym1.value == 'true' and sym2.value == 'false':
                 result = True
@@ -357,6 +388,8 @@ class Instruction:
         result = False
         if sym1.type == 'int':
             result = int(sym1.value) == int(sym2.value)
+        elif sym1.type == 'float':
+            result = sym1.float_value() == sym2.float_value()
         else:
             result = sym1.value == sym2.value
 
@@ -565,6 +598,9 @@ class Instruction:
         if sym1.type == 'int':
             if int(sym1.value) == int(sym2.value):
                 ctx.jump_to_label(self.args[0].value)
+        elif sym1.type == 'float':
+            if sym1.float_value() == sym2.float_value():
+                ctx.jump_to_label(self.args[0].value)
         else:
             if sym1.value == sym2.value:
                 ctx.jump_to_label(self.args[0].value)
@@ -588,6 +624,9 @@ class Instruction:
 
         if sym1.type == 'int':
             if int(sym1.value) != int(sym2.value):
+                ctx.jump_to_label(self.args[0].value)
+        elif sym1.type == 'float':
+            if sym1.float_value() != sym2.float_value():
                 ctx.jump_to_label(self.args[0].value)
         else:
             if sym1.value != sym2.value:
