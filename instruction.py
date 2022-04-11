@@ -155,9 +155,32 @@ class Instruction:
         return
 
     def int2float(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        if sym1.type != 'int':
+            ctx.error('INT2FLOAT accepts only integer parameters.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        val = float(sym1.value)
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'float', val)
+
         return
 
     def float2int(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        if sym1.type != 'float':
+            ctx.error('FLOAT2INT accepts only float parameters.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        val = 0
+        try:
+            val = int(float(sym1.value))
+        except ValueError:
+            val = int(float.fromhex(sym1.value))
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'int', val)
+
         return
 
     def add(self, ctx: Context):
