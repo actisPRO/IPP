@@ -151,6 +151,14 @@ class Instruction:
     def add(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
+        if sym1.type != 'int' or sym2.type != 'int':
+            ctx.error('ADD accepts only integer parameters.')
+            exit(ExitCode.BAD_OPERAND_TYPE)
+
+        result = int(sym1.value) + int(sym2.value)
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'int', result)
 
         return
 
