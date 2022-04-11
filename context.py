@@ -9,6 +9,7 @@ class Context:
     GF = dict()
     LFs = list()
     labels = dict()
+    calls = list()
 
     def __init__(self):
         self.current_pos = 0
@@ -22,7 +23,7 @@ class Context:
     def load_labels(self):
         for i in self.instructions:
             if i.opcode == 'LABEL':
-                self.labels[i.args[0].value] = i.order
+                self.labels[i.args[0].value] = int(i.order)
 
     def error(self, message):
         print(f'ERROR (instruction #{self.current_pos + 1}): {message}', file=sys.stderr)
@@ -101,3 +102,10 @@ class Context:
                 exit(ExitCode.UNDEFINED_FRAME.value)
 
             self.TF[name] = var
+
+    def jump_to_label(self, label: str):
+        if label not in self.labels.keys():
+            self.error(f'label {label} does not exist.')
+            exit(ExitCode.SEMANTIC_ERROR.value)
+
+        self.current_pos = self.labels[label] - 1

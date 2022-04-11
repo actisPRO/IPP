@@ -128,6 +128,8 @@ class Instruction:
         return
 
     def call(self, ctx: Context):
+        ctx.calls.append(self.order)
+        ctx.jump_to_label(self.args[0].value)
         return
 
     def exec_return(self, ctx: Context):
