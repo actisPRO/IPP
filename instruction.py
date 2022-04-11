@@ -448,6 +448,9 @@ class Instruction:
         return
 
     def type(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        var_data = self.args[0].value.split('@')
+        ctx.set_variable(var_data[0], var_data[1], 'string', sym1.type)
         return
 
     def label(self, ctx: Context):
