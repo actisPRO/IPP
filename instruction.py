@@ -33,6 +33,10 @@ class Instruction:
             self.pushs(ctx)
         elif self.opcode == "POPS":
             self.pops(ctx)
+        elif self.opcode == 'INT2FLOAT':
+            self.int2float(ctx)
+        elif self.opcode == 'FLOAT2INT':
+            self.float2int(ctx)
         elif self.opcode == "ADD":
             self.add(ctx)
         elif self.opcode == "SUB":
@@ -148,6 +152,12 @@ class Instruction:
         var_data = self.args[0].value.split('@')
         ctx.set_variable(var_data[0], var_data[1], var.type, var.value)
 
+        return
+
+    def int2float(self, ctx: Context):
+        return
+
+    def float2int(self, ctx: Context):
         return
 
     def add(self, ctx: Context):
