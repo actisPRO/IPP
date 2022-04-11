@@ -45,7 +45,7 @@ class Instruction:
 
     def defvar(self, ctx: Context):
         data = self.args[0].value.split('@')
-        ctx.set_variable(data[0], data[1], None, None)
+        ctx.def_var(data[0], data[1])
         return
 
     def call(self, ctx: Context):
