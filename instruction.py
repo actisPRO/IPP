@@ -117,7 +117,7 @@ class Instruction:
     def popframe(self, ctx: Context):
         if len(ctx.LFs) == 0:
             ctx.error('local frame stack is empty.')
-            exit(ExitCode.UNDEFINED_FRAME.value)
+            exit(ExitCode.MISSING_VALUE.value)
 
         ctx.TF = ctx.LFs.pop()
         return
@@ -133,6 +133,11 @@ class Instruction:
         return
 
     def exec_return(self, ctx: Context):
+        if len(ctx.calls) == 0:
+            ctx.error('call frame is empty.')
+            exit(ExitCode.MISSING_VALUE.value)
+
+        ctx.current_pos = ctx.calls.pop()
         return
 
     def pushs(self, ctx: Context):
