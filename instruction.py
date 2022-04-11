@@ -429,6 +429,22 @@ class Instruction:
         return
 
     def setchar(self, ctx: Context):
+        var_data = self.args[0].value.split('@')
+        var = ctx.get_variable(var_data[0], var_data[1])
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+        if var.type != 'string' or sym1.type != 'int' or sym2.type != 'string':
+            ctx.error('SETCHAR expected signature is VAR(STRING) INT STRING.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+        if int(sym1.value) < 0 or int(sym1.value) >= len(var.value):
+            ctx.error('Index is out of range.')
+            exit(ExitCode.BAD_STRING.value)
+        if sym2.value == '':
+            ctx.error('Char can\'t be empty.')
+            exit(ExitCode.BAD_STRING.value)
+
+        var.value = var.value[:int(sym1.value)] + sym2.value[0] + var.value[int(sym1.value) + 1:]
+        ctx.set_variable(var_data[0], var_data[1], 'string', var.value)
         return
 
     def type(self, ctx: Context):
