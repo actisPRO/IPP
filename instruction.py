@@ -1,7 +1,7 @@
 from argument import Argument
 from context import Context
 from exit_code import ExitCode
-
+from variable import Variable
 
 class Instruction:
     def __init__(self, opcode: str, order: int):
@@ -141,6 +141,17 @@ class Instruction:
         return
 
     def pushs(self, ctx: Context):
+        var = Variable(None, None)
+        if self.args[0].type == 'var':
+            sym_data = self.args[0].value.split('@')
+            sym = ctx.get_variable(sym_data[0], sym_data[1])
+            var.type = sym.type
+            var.value = sym.value
+        else:
+            var.type = self.args[0].type
+            var.value = self.args[0].value
+
+        ctx.stack.append(var)
         return
 
     def pops(self, ctx: Context):

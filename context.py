@@ -10,6 +10,7 @@ class Context:
     LFs = list()
     labels = dict()
     calls = list()
+    stack = list()
 
     def __init__(self):
         self.current_pos = 0
@@ -34,6 +35,10 @@ class Context:
                 self.error(f'variable {name} is not defined in the global frame.')
                 exit(ExitCode.UNDEFINED_VARIABLE.value)
 
+            if self.GF[name].type is None:
+                self.error(f'variable {name} is declared but undefined.')
+                exit(ExitCode.MISSING_VALUE.value)
+
             return self.GF[name]
         elif frame == 'LF':
             if len(self.LFs) == 0:
@@ -44,6 +49,10 @@ class Context:
                 self.error(f'variable {name} is not defined in the local frame.')
                 exit(ExitCode.SEMANTIC_ERROR.value)
 
+            if self.LFs[-1][name].type is None:
+                self.error(f'variable {name} is declared but undefined.')
+                exit(ExitCode.MISSING_VALUE.value)
+
             return self.LFs[-1][name]
         elif frame == 'TF':
             if self.TF is None:
@@ -53,6 +62,10 @@ class Context:
             if name not in self.TF.keys():
                 self.error(f'variable {name} is not defined in the temporary frame.')
                 exit(ExitCode.SEMANTIC_ERROR.value)
+
+            if self.TF[name].type is None:
+                self.error(f'variable {name} is declared but is not defined.')
+                exit(ExitCode.MISSING_VALUE.value)
 
             return self.TF[name]
 
