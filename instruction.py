@@ -259,6 +259,34 @@ class Instruction:
         return
 
     def eq(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+
+        if sym1.type == 'nil' or sym2.type == 'nil':
+            var = self.args[0].value.split('@')
+            if sym1.type == 'nil' and sym2.type != 'nil' or sym1.type != 'nil' and sym2.type == 'nil':
+                ctx.set_variable(var[0], var[1], 'bool', 'false')
+            else:
+                ctx.set_variable(var[0], var[1], 'bool', 'true')
+            return
+
+        if sym1.type != sym2.type:
+            ctx.error('EQ only accepts parameters with equal types.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        result = False
+        if sym1.type == 'int':
+            result = int(sym1.value) == int(sym2.value)
+        else:
+            result = sym1.value == sym2.value
+
+        if result:
+            result = 'true'
+        else:
+            result = 'false'
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'bool', result)
         return
 
     def exec_and(self, ctx: Context):
