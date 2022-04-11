@@ -117,6 +117,7 @@ function getInstructionArgType(string $opcode): InstructionArgType|null
         'LABEL' => InstructionArgType::LABEL,
         'JUMP' => InstructionArgType::LABEL,
         'JUMPIFEQ' => InstructionArgType::LABEL_SYM_SYM,
+        "JUMPIFNEQ" => InstructionArgType::LABEL_SYM_SYM,
         'EXIT' => InstructionArgType::SYM,
         'DPRINT' => InstructionArgType::SYM,
         'BREAK' => InstructionArgType::NOARG
