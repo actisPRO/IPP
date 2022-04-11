@@ -322,7 +322,18 @@ class Instruction:
         return
 
     def int2char(self, ctx: Context):
-        return
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        if sym1.type != 'int':
+            ctx.error('INT2CHAR accepts only an integer parameter.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        try:
+            result = chr(int(sym1.value))
+            var = self.args[0].value.split('@')
+            ctx.set_variable(var[0], var[1], 'int', result)
+        except ValueError:
+            ctx.error(f'{sym1.value} is an incorrect Unicode code.')
+            exit(ExitCode.BAD_STRING)
 
     def stri2int(self, ctx: Context):
         return
