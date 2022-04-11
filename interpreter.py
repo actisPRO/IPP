@@ -40,6 +40,9 @@ class Interpreter:
 
         self.context = Context()
 
+    def execute(self):
+        self.context.execute()
+
     def parse_xml(self):
         root = self.xml_tree.getroot()
 
@@ -47,8 +50,6 @@ class Interpreter:
         self.validate_xml(root)
         self.load_instructions(root)
         self.context.load_labels()
-
-        print(root[0].attrib)
 
     def load_instructions(self, root: ET.Element):
         for child in root:

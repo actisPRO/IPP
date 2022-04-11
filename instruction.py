@@ -1,4 +1,5 @@
 from argument import Argument
+from context import Context
 
 
 class Instruction:
@@ -6,6 +7,9 @@ class Instruction:
         self.opcode = opcode
         self.order = order
         self.args = []
+
+    def execute(self, ctx: Context):
+        print('exec')
 
     def add_arg(self, arg: Argument):
         self.args.append(arg)

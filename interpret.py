@@ -18,6 +18,7 @@ if __name__ == '__main__':
     try:
         interpreter = Interpreter(args.source, args.input)
         interpreter.parse_xml()
+        interpreter.execute()
     except FileNotFoundError:
         print('ERROR: specified file was not found.', file=sys.stderr)
         exit(ExitCode.READ_ERROR.value)
