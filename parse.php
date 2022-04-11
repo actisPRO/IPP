@@ -48,6 +48,7 @@ enum ArgType: string
     case VAR = 'var';
     case NIL = 'nil';
     case INT = 'int';
+    case FLOAT = 'float';
     case BOOL = 'bool';
     case STRING = 'string';
     case LABEL = 'label';
@@ -61,6 +62,7 @@ function strToArgType(string $str): ArgType|null
         'var' => ArgType::VAR,
         'nil' => ArgType::NIL,
         'int' => ArgType::INT,
+        'float' => ArgType::FLOAT,
         'bool' => ArgType::BOOL,
         'string' => ArgType::STRING,
         'label' => ArgType::LABEL,
@@ -95,10 +97,13 @@ function getInstructionArgType(string $opcode): InstructionArgType|null
         'RETURN' => InstructionArgType::NOARG,
         'PUSHS' => InstructionArgType::SYM,
         'POPS' => InstructionArgType::VAR,
+        'INT2FLOAT' => InstructionArgType::VAR_SYM,
+        'FLOAT2INT' => InstructionArgType::VAR_SYM,
         'ADD' => InstructionArgType::VAR_SYM_SYM,
         'SUB' => InstructionArgType::VAR_SYM_SYM,
         'MUL' => InstructionArgType::VAR_SYM_SYM,
         'IDIV' => InstructionArgType::VAR_SYM_SYM,
+        'DIV' => InstructionArgType::VAR_SYM_SYM,
         'LT' => InstructionArgType::VAR_SYM_SYM,
         'GT' => InstructionArgType::VAR_SYM_SYM,
         'EQ' => InstructionArgType::VAR_SYM_SYM,
@@ -233,7 +238,7 @@ function validateVariableName(string $value): void
 function validateTypeName(string $value): void
 {
     global $lineIndex;
-    if ($value != 'int' && $value != 'string' && $value != 'bool' && $value != 'nil')
+    if ($value != 'int' && $value != 'string' && $value != 'bool' && $value != 'nil' && $value != 'float')
         error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected type, but got '$value'");
 }
 
@@ -318,6 +323,10 @@ function validateConstantValue(string $value, ArgType $expectedType)
         case ArgType::INT:
             if (!preg_match("/^[+-]?[\d]+$/", $value))
                 error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be int.");
+            break;
+        case ArgType::FLOAT:
+            if (!preg_match("/[+-]?([0-9]*[.])?[0-9]+/", $value))
+                error(ErrorCode::PARSER_ERROR, "Line $lineIndex: expected '$value' to be float.");
             break;
         case ArgType::STRING:
             // Error isn't possible here as string can contain any chars except for special ones, but they are controlled in other places
