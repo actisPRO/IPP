@@ -1,5 +1,6 @@
 import io
 import os.path
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -50,7 +51,7 @@ class Interpreter:
         print(root[0].attrib)
 
     @staticmethod
-    def sort_xml(root):
+    def sort_xml(root: ET.Element):
         try:
             root[:] = sorted(root, key=lambda child: int(child.get('order')))
         except Exception as e:
@@ -67,7 +68,7 @@ class Interpreter:
                 exit(ExitCode.UNEXPECTED_XML.value)
 
     @staticmethod
-    def validate_xml(root):
+    def validate_xml(root: ET.Element):
         expected_order = 1
 
         for child in root:
@@ -81,8 +82,17 @@ class Interpreter:
                 exit(ExitCode.UNEXPECTED_XML.value)
 
             if int(child.attrib['order']) != expected_order:
-                print(f'Expected order to be {expected_order} but it was {child.attrib["order"]}.', file=sys.stderr)
+                print(f'ERROR: Expected order to be {expected_order} but it was {child.attrib["order"]}.', file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML.value)
+
+            for arg in child:
+                if not(re.match(r"arg[123]", arg.tag)):
+                    print(f'ERROR: Expected {arg.tag} to be arg1, arg2 or arg3.', file=sys.stderr)
+                    exit(ExitCode.UNEXPECTED_XML.value)
+                arg_attrs = list(arg.attrib)
+                if not('type' in arg_attrs):
+                    print(f'ERROR: {arg.tag} of instruction #{child.attrib["order"]} does not contain type info.', file=sys.stderr)
+                    exit(ExitCode.UNEXPECTED_XML.value)
 
             expected_order += 1
 
