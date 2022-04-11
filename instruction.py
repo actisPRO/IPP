@@ -5,6 +5,7 @@ from context import Context
 from exit_code import ExitCode
 from variable import Variable
 
+
 class Instruction:
     def __init__(self, opcode: str, order: int):
         self.opcode = opcode
