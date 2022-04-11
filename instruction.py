@@ -13,20 +13,76 @@ class Instruction:
         self.args.append(arg)
 
     def execute(self, ctx: Context):
-        if self.opcode == 'MOVE':
+        if self.opcode == "MOVE":
             self.move(ctx)
-        elif self.opcode == 'CREATEFRAME':
+        elif self.opcode == "CREATEFRAME":
             self.createframe(ctx)
-        elif self.opcode == 'PUSHFRAME':
+        elif self.opcode == "PUSHFRAME":
             self.pushframe(ctx)
-        elif self.opcode == 'POPFRAME':
+        elif self.opcode == "POPFRAME":
             self.popframe(ctx)
-        elif self.opcode == 'DEFVAR':
+        elif self.opcode == "DEFVAR":
             self.defvar(ctx)
-        elif self.opcode == 'CALL':
+        elif self.opcode == "CALL":
             self.call(ctx)
-        elif self.opcode == 'RETURN':
+        elif self.opcode == "RETURN":
             self.exec_return(ctx)
+        elif self.opcode == "PUSHS":
+            self.pushs(ctx)
+        elif self.opcode == "POPS":
+            self.pops(ctx)
+        elif self.opcode == "ADD":
+            self.add(ctx)
+        elif self.opcode == "SUB":
+            self.sub(ctx)
+        elif self.opcode == "MUL":
+            self.mul(ctx)
+        elif self.opcode == "IDIV":
+            self.idiv(ctx)
+        elif self.opcode == "LT":
+            self.lt(ctx)
+        elif self.opcode == "GT":
+            self.gt(ctx)
+        elif self.opcode == "EQ":
+            self.eq(ctx)
+        elif self.opcode == "AND":
+            self.exec_and(ctx)
+        elif self.opcode == "OR":
+            self.exec_or(ctx)
+        elif self.opcode == "NOT":
+            self.exec_not(ctx)
+        elif self.opcode == "INT2CHAR":
+            self.int2char(ctx)
+        elif self.opcode == "STRI2INT":
+            self.stri2int(ctx)
+        elif self.opcode == "READ":
+            self.read(ctx)
+        elif self.opcode == "WRITE":
+            self.write(ctx)
+        elif self.opcode == "CONCAT":
+            self.concat(ctx)
+        elif self.opcode == "STRLEN":
+            self.strlen(ctx)
+        elif self.opcode == "GETCHAR":
+            self.getchar(ctx)
+        elif self.opcode == "SETCHAR":
+            self.setchar(ctx)
+        elif self.opcode == "TYPE":
+            self.type(ctx)
+        elif self.opcode == "LABEL":
+            self.label(ctx)
+        elif self.opcode == "JUMP":
+            self.jump(ctx)
+        elif self.opcode == "JUMPIFEQ":
+            self.jumpifeq(ctx)
+        elif self.opcode == "JUMPIFNEQ":
+            self.jumpifneq(ctx)
+        elif self.opcode == "EXIT":
+            self.exit(ctx)
+        elif self.opcode == "DPRINT":
+            self.dprint(ctx)
+        elif self.opcode == "BREAK":
+            self.exec_break(ctx)
 
     def move(self, ctx: Context):
         var_type = None
@@ -75,4 +131,88 @@ class Instruction:
         return
 
     def exec_return(self, ctx: Context):
+        return
+
+    def pushs(self, ctx: Context):
+        return
+
+    def pops(self, ctx: Context):
+        return
+
+    def add(self, ctx: Context):
+        return
+
+    def sub(self, ctx: Context):
+        return
+
+    def mul(self, ctx: Context):
+        return
+
+    def idiv(self, ctx: Context):
+        return
+
+    def lt(self, ctx: Context):
+        return
+
+    def gt(self, ctx: Context):
+        return
+
+    def eq(self, ctx: Context):
+        return
+
+    def exec_and(self, ctx: Context):
+        return
+
+    def exec_or(self, ctx: Context):
+        return
+
+    def exec_not(self, ctx: Context):
+        return
+
+    def int2char(self, ctx: Context):
+        return
+
+    def stri2int(self, ctx: Context):
+        return
+
+    def read(self, ctx: Context):
+        return
+
+    def write(self, ctx: Context):
+        return
+
+    def concat(self, ctx: Context):
+        return
+
+    def strlen(self, ctx: Context):
+        return
+
+    def getchar(self, ctx: Context):
+        return
+
+    def setchar(self, ctx: Context):
+        return
+
+    def type(self, ctx: Context):
+        return
+
+    def label(self, ctx: Context):
+        return
+
+    def jump(self, ctx: Context):
+        return
+
+    def jumpifeq(self, ctx: Context):
+        return
+
+    def jumpifneq(self, ctx: Context):
+        return
+
+    def exit(self, ctx: Context):
+        return
+
+    def dprint(self, ctx: Context):
+        return
+
+    def exec_break(self, ctx: Context):
         return
