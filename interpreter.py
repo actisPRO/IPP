@@ -43,13 +43,10 @@ class Interpreter:
     def parse_xml(self):
         root = self.xml_tree.getroot()
 
-        if root.tag != 'program':
-            print("ERROR: Invalid XML root.", file=sys.stderr)
-            exit(ExitCode.UNEXPECTED_XML.value)
-
         self.sort_xml(root)
         self.validate_xml(root)
         self.load_instructions(root)
+        self.context.load_labels()
 
         print(root[0].attrib)
 
@@ -85,8 +82,15 @@ class Interpreter:
 
     @staticmethod
     def validate_xml(root: ET.Element):
-        expected_order = 1
+        if root.tag != 'program':
+            print(f"ERROR: Expected {root.tag} to be program.", file=sys.stderr)
+            exit(ExitCode.UNEXPECTED_XML.value)
 
+        if root.attrib['language'] is None or root.attrib['language'].lower() != 'ippcode22':
+            print(f'ERROR: Expected root to containt attribute language with value "IPPcode22".', file=sys.stderr)
+            exit(ExitCode.UNEXPECTED_XML.value)
+
+        expected_order = 1
         for child in root:
             if child.tag != 'instruction':
                 print(f'ERROR: Unexpected XML-tag {child.tag}. Expected: instruction', file=sys.stderr)
