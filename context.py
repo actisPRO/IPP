@@ -27,7 +27,7 @@ class Context:
     def error(self, message):
         print(f'ERROR (instruction #{self.current_pos + 1}): {message}', file=sys.stderr)
 
-    def get_variable(self, frame: str, name: str):
+    def get_variable(self, frame: str, name: str) -> Variable:
         if frame == 'GF':
             if name not in self.GF.keys():
                 self.error(f'variable {name} is not defined in the global frame.')

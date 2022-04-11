@@ -1,9 +1,5 @@
-import sys
-
 from argument import Argument
 from context import Context
-from exit_code import ExitCode
-from variable import Variable
 
 
 class Instruction:
@@ -32,6 +28,20 @@ class Instruction:
             self.exec_return(ctx)
 
     def move(self, ctx: Context):
+        var_type = None
+        value = None
+        if self.args[1].type == 'var':
+            sym_data = self.args[1].value.split('@')
+            sym = ctx.get_variable(sym_data[0], sym_data[1])
+            var_type = sym.type
+            value = sym.value
+        else:
+            var_type = self.args[1].type
+            value = self.args[1].value
+
+        var_data = self.args[0].value.split('@')
+        ctx.set_variable(var_data[0], var_data[1], var_type, value)
+
         return
 
     def createframe(self, ctx: Context):
