@@ -295,6 +295,17 @@ class Instruction:
         return
 
     def exec_or(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[1])
+        sym2 = ctx.get_variable_from_arg(self.args[2])
+        if sym1.type != 'bool' or sym2.type != 'bool':
+            ctx.error('OR accepts only boolean parameters.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        result = sym1.value == 'true' or sym2.value == 'true'
+        result = str(result).lower()
+
+        var = self.args[0].value.split('@')
+        ctx.set_variable(var[0], var[1], 'bool', result)
         return
 
     def exec_not(self, ctx: Context):
