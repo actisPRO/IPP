@@ -509,6 +509,18 @@ class Instruction:
         return
 
     def exit(self, ctx: Context):
+        sym1 = ctx.get_variable_from_arg(self.args[0])
+        if sym1.type != 'int':
+            ctx.error('EXIT only accepts an integer parameter.')
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        val = int(sym1.value)
+        if val < 0 or val > 49:
+            ctx.error('EXIT parameter should be in 0-49 range.')
+            exit(ExitCode.BAD_OPERAND_VALUE.value)
+
+        exit(val)
+
         return
 
     def dprint(self, ctx: Context):
