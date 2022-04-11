@@ -531,4 +531,30 @@ class Instruction:
         return
 
     def exec_break(self, ctx: Context):
+        result = f'Current instruction: {ctx.current_pos}\n'
+        result += f'Stack ({len(ctx.stack)} elements):\n'
+
+        index = -1
+        for v in ctx.stack:
+            result += f'({(index + 1) / -1}) {v}\n'
+
+        result += f'\nGF ({len(ctx.GF)} elements):\n'
+        for el in ctx.GF:
+            result += f'{el} = {ctx.GF[el]}\n'
+
+        if len(ctx.LFs) != 0:
+            result += f'\nLF ({len(ctx.LFs[-1])} elements):\n'
+            for el in ctx.GF:
+                result += f'{el} = {ctx.LFs[-1][el]}\n'
+        else:
+            result += 'LF does not exist.\n'
+
+        if ctx.TF is not None:
+            result += f'\nGF ({len(ctx.TF)} elements):\n'
+            for el in ctx.TF:
+                result += f'{el} = {ctx.TF[el]}\n'
+        else:
+            result += 'TF does not exist.\n'
+
+        print(result, file=sys.stderr, end='')
         return
