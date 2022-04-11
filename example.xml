@@ -13,7 +13,7 @@
     <instruction order="4" opcode="JUMPIFEQ">
         <arg1 type="label">end</arg1>
         <arg2 type="var">GF@counter</arg2>
-        <arg3>aaa</arg3>
+        <arg3 type="string">aaa</arg3>
     </instruction>
     <instruction order="5" opcode="WRITE">
         <arg1 type="string">Proměnná\032GF@counter\032obsahuje\032</arg1>

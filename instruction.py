@@ -2,9 +2,9 @@ from argument import Argument
 
 
 class Instruction:
-    def __init__(self, opcode, number):
+    def __init__(self, opcode: str, order: int):
         self.opcode = opcode
-        self.number = number
+        self.order = order
         self.args = []
 
     def add_arg(self, arg: Argument):

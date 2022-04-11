@@ -5,6 +5,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 from context import Context
+from instruction import Instruction
+from argument import Argument
 from exit_code import ExitCode
 
 
@@ -47,8 +49,22 @@ class Interpreter:
 
         self.sort_xml(root)
         self.validate_xml(root)
+        self.load_instructions(root)
 
         print(root[0].attrib)
+
+    def load_instructions(self, root: ET.Element):
+        for child in root:
+            instruction = Instruction(
+                child.attrib['opcode'].upper(),
+                int(child.attrib['order']))
+            for arg in child:
+                instruction.add_arg(Argument(
+                    arg.attrib['type'].lower(),
+                    arg.text
+                ))
+
+            self.context.instructions.append(instruction)
 
     @staticmethod
     def sort_xml(root: ET.Element):
@@ -77,23 +93,23 @@ class Interpreter:
                 exit(ExitCode.UNEXPECTED_XML.value)
 
             attributes = list(child.attrib.keys())
-            if not('order' in attributes) or not('opcode' in attributes):
+            if not ('order' in attributes) or not ('opcode' in attributes):
                 print('ERROR: Every instruction should contain opcode and order atrtibutes.', file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML.value)
 
             if int(child.attrib['order']) != expected_order:
-                print(f'ERROR: Expected order to be {expected_order} but it was {child.attrib["order"]}.', file=sys.stderr)
+                print(f'ERROR: Expected order to be {expected_order} but it was {child.attrib["order"]}.',
+                      file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML.value)
 
             for arg in child:
-                if not(re.match(r"arg[123]", arg.tag)):
+                if not (re.match(r"arg[123]", arg.tag)):
                     print(f'ERROR: Expected {arg.tag} to be arg1, arg2 or arg3.', file=sys.stderr)
                     exit(ExitCode.UNEXPECTED_XML.value)
                 arg_attrs = list(arg.attrib)
-                if not('type' in arg_attrs):
-                    print(f'ERROR: {arg.tag} of instruction #{child.attrib["order"]} does not contain type info.', file=sys.stderr)
+                if not ('type' in arg_attrs):
+                    print(f'ERROR: {arg.tag} of instruction #{child.attrib["order"]} does not contain type info.',
+                          file=sys.stderr)
                     exit(ExitCode.UNEXPECTED_XML.value)
 
             expected_order += 1
-
-
