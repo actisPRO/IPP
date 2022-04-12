@@ -173,6 +173,18 @@ function runInterpreter(string $test, string $source): array {
     );
 }
 
+function compareXml(string $out, string $ref, string $delta): bool {
+    global $jExamXmlPath;
+    $sh = "java -jar $jExamXmlPath/jexamxml.jar $out $ref $delta $jExamXmlPath/options";
+
+    $result = exec($sh);
+    if (str_contains($result, "not identical")) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
 function runTest(string $path): array {
     global $parseOnly, $intOnly, $noclean;
 
@@ -217,7 +229,33 @@ function runTest(string $path): array {
         ];
     }
 
-    return ['success' => true];
+    $fs = fopen("$path.temp.out", 'w');
+    fwrite($fs, $out['out']);
+    fclose($fs);
+
+    $result = [];
+    if ($parseOnly) {
+        $compare = compareXml("$path.temp.out", "$path.out", "$path.delta");
+        if ($compare)
+            $result = ['success' => true];
+        else
+            $result = [
+                'success' => false,
+                'message' => 'XML files are not equal',
+                'expected' => "",
+                'actual' => ""
+            ];
+    } else {
+        $result = ['success' => true];
+    }
+
+    if (!$noclean) {
+        unlink("$path.temp.out");
+        if ($parseOnly)
+            unlink("$path.delta");
+    }
+
+    return $result;
 }
 
 parseArgs();
