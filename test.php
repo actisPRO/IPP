@@ -92,7 +92,27 @@ function parseArgs()
     }
 }
 
-function findTestsInFolder(string $directory): array {
+function checkAndCreateTestFiles(string $path, string $testName)
+{
+    if (!file_exists("$path/$testName.in")) {
+        $file = fopen("$path/$testName.in", 'w');
+        fclose($file);
+    }
+
+    if (!file_exists("$path/$testName.out")) {
+        $file = fopen("$path/$testName.out", 'w');
+        fclose($file);
+    }
+
+    if (!file_exists("$path/$testName.rc")) {
+        $file = fopen("$path/$testName.rc", 'w');
+        fwrite($file, '0');
+        fclose($file);
+    }
+}
+
+function findTestsInFolder(string $directory): array
+{
     global $recursive;
 
     if (!is_dir($directory))
@@ -110,7 +130,8 @@ function findTestsInFolder(string $directory): array {
         } else {
             if (str_ends_with($item, '.src')) {
                 $name = substr($item, 0, -4);
-                $result[] = $name;
+                checkAndCreateTestFiles($directory, $name);
+                $result[] = $directory . '/' . $name;
             }
         }
     }
