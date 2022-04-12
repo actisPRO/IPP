@@ -185,6 +185,17 @@ function compareXml(string $out, string $ref, string $delta): bool {
     }
 };
 
+function compareText(string $out, string $ref): bool {
+    $sh = "diff $out $ref";
+
+    $result = exec($sh);
+    if ($result == '') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function runTest(string $path): array {
     global $parseOnly, $intOnly, $noclean;
 
@@ -246,6 +257,17 @@ function runTest(string $path): array {
                 'actual' => ""
             ];
     } else {
+        $compare = compareText("$path.temp.out", "$path.out");
+        if ($compare)
+            $result = ['success' => true];
+        else
+            $result = [
+                'success' => false,
+                'message' => 'Output files are not equal',
+                'expected' => "",
+                'actual' => ""
+            ];
+
         $result = ['success' => true];
     }
 
