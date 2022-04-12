@@ -223,8 +223,10 @@ function runTest(string $path): array {
 parseArgs();
 $tests = findTestsInFolder($directory);
 
-$testCase = 1;
+$testCase = 0;
+$failed = 0;
 foreach ($tests as $test) {
+    $testCase += 1;
     $res = runTest($test);
 
     if ($res['success']) {
@@ -237,7 +239,10 @@ foreach ($tests as $test) {
         echo "Test case #$testCase ($test): fail. Reason: $reason.\n";
         echo "Expected:\n$expected\n\n";
         echo "Received:\n$actual\n";
-    }
 
-    $testCase += 1;
+        $failed += 1;
+    }
 }
+
+$successful = $testCase - $failed;
+echo "Total tests: $testCase. Successful: $successful. Failed: $failed.\n";
