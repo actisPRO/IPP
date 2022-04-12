@@ -3,6 +3,9 @@ class Variable:
         self.type = var_type
         self.value = value
 
+        if self.type == 'string' and self.value is None:
+            self.value = ''
+
     def __str__(self):
         return f"{self.type}@{self.value}"
 
