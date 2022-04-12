@@ -129,14 +129,14 @@ function findTestsInFolder(string $directory): array
     foreach ($content as $item) {
         if ($item == '.' or $item == '..') continue;
         else if (is_dir($item) && $recursive) {
-            $tests = findTestsInFolder($directory . '\\' . $item);
+            $tests = findTestsInFolder($directory . '/' . $item);
             foreach ($tests as $test)
                 $result[] = $test;
         } else {
             if (str_ends_with($item, '.src')) {
                 $name = substr($item, 0, -4);
                 checkAndCreateTestFiles($directory, $name);
-                $result[] = $directory . '\\' . $name;
+                $result[] = $directory . '/' . $name;
             }
         }
     }
@@ -147,7 +147,7 @@ function findTestsInFolder(string $directory): array
 function runParser(string $test): array {
     global $parseScript;
 
-    $sh = "php $parseScript < $test.src"; // todo use merlin command
+    $sh = "cat $test.src | php8.1 $parseScript"; // todo use merlin command
     $output = [];
     $exitCode = 0;
     exec($sh, $output, $exitCode);
@@ -157,25 +157,13 @@ function runParser(string $test): array {
     );
 }
 
-function runInterpreterFromFile(string $test): array {
+function runInterpreter(string $test, string $source): array {
     global $intScript;
 
-    $sh = "python $intScript < $test.src"; // todo use merlin command
+    $sh = "python3.8 $intScript --source=$source --input=$test.in"; // todo use merlin command
     $output = [];
     $exitCode = 0;
-    exec($sh, $output, $exitCode);
-    return array(
-        'out' => implode("\n", $output),
-        'code' => $exitCode
-    );
-}
 
-function runInterpreterFromText(string $test, string $xml): array {
-    global $intScript;
-
-    $sh = "echo $xml | python $intScript --input=$test.in"; // todo use merlin command
-    $output = [];
-    $exitCode = 0;
     exec($sh, $output, $exitCode);
     return array(
         'out' => implode("\n", $output),
@@ -184,7 +172,7 @@ function runInterpreterFromText(string $test, string $xml): array {
 }
 
 function runTest(string $path) {
-    global $parseOnly, $intOnly;
+    global $parseOnly, $intOnly, $noclean;
 
     if ($parseOnly) {
         $out = runParser($path);
@@ -192,12 +180,20 @@ function runTest(string $path) {
     }
 
     if ($intOnly) {
-        $out = runInterpreterFromFile($path);
+        $out = runInterpreter($path, "$path.src");
         return;
     }
 
-    $xml = runParser($path);
-    $out = runInterpreterFromText($path, $xml['out']);
+    $xml = runParser($path); // todo: check exit code
+    $file = fopen("$path.temp.xml", 'w');
+    fwrite($file, $xml['out']);
+    fclose($file);
+
+    $out = runInterpreter($path, "$path.temp.xml");
+
+    if (!$noclean) {
+        unlink("$path.xml.temp");
+    }
 }
 
 parseArgs();
