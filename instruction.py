@@ -499,6 +499,11 @@ class Instruction:
             print('')
         elif sym.type == 'bool':
             print(sym.value)
+        elif sym.type == 'string':
+            for i in range(999):
+                number = "\\{:03d}".format(i)
+                sym.value = sym.value.replace(number, chr(i))
+            print(sym.value, end='')
         else:
             print(sym.value, end='')
 
