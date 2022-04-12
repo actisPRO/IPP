@@ -153,6 +153,7 @@ function runParser(string $test): array {
     exec($sh, $output, $exitCode);
     return array(
         'out' => implode("\n", $output),
+        'type' => 'xml',
         'code' => $exitCode
     );
 }
@@ -167,35 +168,76 @@ function runInterpreter(string $test, string $source): array {
     exec($sh, $output, $exitCode);
     return array(
         'out' => implode("\n", $output),
+        'type' => 'text',
         'code' => $exitCode
     );
 }
 
-function runTest(string $path) {
+function runTest(string $path): array {
     global $parseOnly, $intOnly, $noclean;
 
+    $out = [];
     if ($parseOnly) {
         $out = runParser($path);
-        return;
     }
-
-    if ($intOnly) {
+    else if ($intOnly) {
         $out = runInterpreter($path, "$path.src");
-        return;
+    } else {
+        $xml = runParser($path);
+        if ($xml['code'] != 0) {
+            return [
+                'success' => false,
+                'message' => 'Parsing failed',
+                'expected' => 0,
+                'actual' => $xml['code']
+            ];
+        }
+
+        $file = fopen("$path.temp.xml", 'w');
+        fwrite($file, $xml['out']);
+        fclose($file);
+
+        $out = runInterpreter($path, "$path.temp.xml");
+
+        if (!$noclean) {
+            unlink("$path.temp.xml");
+        }
     }
 
-    $xml = runParser($path); // todo: check exit code
-    $file = fopen("$path.temp.xml", 'w');
-    fwrite($file, $xml['out']);
-    fclose($file);
+    $fs = fopen("$path.rc", 'r');
+    $expected_ec = (int) fread($fs, 8);
+    fclose($fs);
 
-    $out = runInterpreter($path, "$path.temp.xml");
-
-    if (!$noclean) {
-        unlink("$path.xml.temp");
+    if ($expected_ec != $out['code']) {
+        return [
+            'success' => false,
+            'message' => 'Wrong exit code',
+            'expected' => $expected_ec,
+            'actual' => $out['code']
+        ];
     }
+
+    return ['success' => true];
 }
 
 parseArgs();
 $tests = findTestsInFolder($directory);
-runTest($tests[0]);
+
+$testCase = 1;
+foreach ($tests as $test) {
+    $res = runTest($test);
+
+    if ($res['success']) {
+        echo "Test case #$testCase ($test): success.\n";
+    } else {
+        $reason = $res['message'];
+        $expected = $res['expected'];
+        $actual = $res['actual'];
+
+        echo "Test case #$testCase ($test): fail. Reason: $reason.\n";
+        echo "Expected:\n$expected\n\n";
+        echo "Received:\n$actual\n";
+    }
+
+    $testCase += 1;
+}
