@@ -90,6 +90,11 @@ function parseArgs()
     if ($intOnlySet && ($parseOnlySet || $parseScriptSet)) {
         error(ExitCode::BAD_ARGUMENT, "Can't combine --int-only with --parse-only or --parse-script");
     }
+
+    if (!file_exists($parseScript) && !$intOnly)
+        error(ExitCode::BAD_PATH, "File $parseScript does not exist.");
+    if (!file_exists($intScript) && !$parseOnly)
+        error(ExitCode::BAD_PATH, "File $intScript does not exist.");
 }
 
 function checkAndCreateTestFiles(string $path, string $testName)
@@ -124,14 +129,14 @@ function findTestsInFolder(string $directory): array
     foreach ($content as $item) {
         if ($item == '.' or $item == '..') continue;
         else if (is_dir($item) && $recursive) {
-            $tests = findTestsInFolder($directory . '/' . $item);
+            $tests = findTestsInFolder($directory . '\\' . $item);
             foreach ($tests as $test)
                 $result[] = $test;
         } else {
             if (str_ends_with($item, '.src')) {
                 $name = substr($item, 0, -4);
                 checkAndCreateTestFiles($directory, $name);
-                $result[] = $directory . '/' . $name;
+                $result[] = $directory . '\\' . $name;
             }
         }
     }
@@ -139,5 +144,62 @@ function findTestsInFolder(string $directory): array
     return $result;
 }
 
+function runParser(string $test): array {
+    global $parseScript;
+
+    $sh = "php $parseScript < $test.src"; // todo use merlin command
+    $output = [];
+    $exitCode = 0;
+    exec($sh, $output, $exitCode);
+    return array(
+        'out' => implode("\n", $output),
+        'code' => $exitCode
+    );
+}
+
+function runInterpreterFromFile(string $test): array {
+    global $intScript;
+
+    $sh = "python $intScript < $test.src"; // todo use merlin command
+    $output = [];
+    $exitCode = 0;
+    exec($sh, $output, $exitCode);
+    return array(
+        'out' => implode("\n", $output),
+        'code' => $exitCode
+    );
+}
+
+function runInterpreterFromText(string $test, string $xml): array {
+    global $intScript;
+
+    $sh = "echo $xml | python $intScript --input=$test.in"; // todo use merlin command
+    $output = [];
+    $exitCode = 0;
+    exec($sh, $output, $exitCode);
+    return array(
+        'out' => implode("\n", $output),
+        'code' => $exitCode
+    );
+}
+
+function runTest(string $path) {
+    global $parseOnly, $intOnly;
+
+    if ($parseOnly) {
+        $out = runParser($path);
+        return;
+    }
+
+    if ($intOnly) {
+        $out = runInterpreterFromFile($path);
+        return;
+    }
+
+    $xml = runParser($path);
+    $out = runInterpreterFromText($path, $xml['out']);
+}
+
 parseArgs();
 $tests = findTestsInFolder($directory);
+runTest($tests[0]);
