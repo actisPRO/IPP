@@ -101,6 +101,7 @@ class Interpreter:
             exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
         expected_order = 0
+        actual_order = 1
         for child in root:
             if child.tag != 'instruction':
                 print(f'ERROR: Unexpected XML-tag {child.tag}. Expected: instruction', file=sys.stderr)
@@ -115,6 +116,7 @@ class Interpreter:
                 print(f'ERROR: Expected order to be bigger then {expected_order} but it was {child.attrib["order"]}.',
                       file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
+            child.attrib['order'] = actual_order
 
             arg1 = False
             arg2 = False
@@ -140,3 +142,4 @@ class Interpreter:
                 exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
             expected_order = int(child.attrib['order'])
+            actual_order += 1
