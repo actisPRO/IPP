@@ -100,7 +100,7 @@ class Interpreter:
             print(f'ERROR: Expected root to containt attribute language with value "IPPcode22".', file=sys.stderr)
             exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
-        expected_order = 1
+        expected_order = 0
         for child in root:
             if child.tag != 'instruction':
                 print(f'ERROR: Unexpected XML-tag {child.tag}. Expected: instruction', file=sys.stderr)
@@ -111,8 +111,8 @@ class Interpreter:
                 print('ERROR: Every instruction should contain opcode and order atrtibutes.', file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
-            if int(child.attrib['order']) != expected_order:
-                print(f'ERROR: Expected order to be {expected_order} but it was {child.attrib["order"]}.',
+            if int(child.attrib['order']) <= expected_order:
+                print(f'ERROR: Expected order to be bigger then {expected_order} but it was {child.attrib["order"]}.',
                       file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
@@ -139,4 +139,4 @@ class Interpreter:
                 Interpreter.error('missing argument: found arg2 and arg1 does not exist, or found arg3 and arg2 or arg1 does not exist.')
                 exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
-            expected_order += 1
+            expected_order = int(child.attrib['order'])
