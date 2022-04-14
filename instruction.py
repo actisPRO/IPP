@@ -98,6 +98,16 @@ class Instruction:
             ctx.error(f'unknown opcode {self.opcode}.')
             exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
+        self.update_stats(ctx)
+
+    def update_stats(self, ctx: Context):
+        if [self.opcode, self.order] not in ctx.stats.hot.keys():
+            ctx.stats.hot[[self.opcode, self.order]] = 0
+        ctx.stats.hot[[self.opcode, self.order]] += 1
+
+        if self.opcode != 'DPRINT' and self.opcode != 'LABEL' and self.opcode != 'BREAK':
+            ctx.stats.insts += 1
+
     def move(self, ctx: Context):
         sym = ctx.get_variable_from_arg(self.args[1])
 

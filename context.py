@@ -3,6 +3,7 @@ import sys
 from exit_code import ExitCode
 from variable import Variable
 from argument import Argument
+from stats import Stats
 
 
 class Context:
@@ -12,6 +13,7 @@ class Context:
     labels = dict()
     calls = list()
     stack = list()
+    stats = Stats()
 
     def __init__(self, input_stream):
         self.current_pos = 0
@@ -21,7 +23,18 @@ class Context:
     def execute(self):
         while self.current_pos != len(self.instructions):
             self.instructions[self.current_pos].execute(self)
+            self.update_stats_vars()
             self.current_pos += 1
+
+    def update_stats_vars(self):
+        count = len(self.GF)
+        if self.TF is not None:
+            count += len(self.TF)
+        for LF in self.LFs:
+            count += len(LF)
+
+        if count > self.stats.vars:
+            self.stats.vars = count
 
     def load_labels(self):
         for i in self.instructions:
