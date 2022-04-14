@@ -306,6 +306,16 @@ class Instruction:
         return
 
     def int2chars(self, ctx: Context):
+        self.check_stack_len(ctx, 1)
+        sym1 = ctx.stack.pop()
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['int'])
+
+        try:
+            result = chr(int(sym1.value))
+            ctx.stack.append(Variable('string', result))
+        except ValueError:
+            ctx.error(f'{sym1.value} is an incorrect Unicode code.')
+            exit(ExitCode.BAD_STRING_OPERATION.value)
         return
 
     def stri2ints(self, ctx: Context):
