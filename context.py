@@ -27,14 +27,23 @@ class Context:
             self.current_pos += 1
 
     def update_stats_vars(self):
-        count = len(self.GF)
+        count = Context.__init_vars_count(self.GF)
         if self.TF is not None:
-            count += len(self.TF)
+            count += Context.__init_vars_count(self.TF)
         for LF in self.LFs:
-            count += len(LF)
+            count += Context.__init_vars_count(LF)
 
         if count > self.stats.vars:
             self.stats.vars = count
+
+    @staticmethod
+    def __init_vars_count(frame: dict) -> int:
+        res = 0
+        for var in frame.values():
+            if var.type is not None and var.value is not None:
+                res += 1
+        return res
+
 
     def load_labels(self):
         for i in self.instructions:

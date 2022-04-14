@@ -143,3 +143,18 @@ class Interpreter:
 
             expected_order = int(child.attrib['order'])
             actual_order += 1
+
+    def print_stats(self, file: str, stats: list):
+        f = open(file, 'w', encoding='utf8')
+        hot = self.context.stats.calc_hot()
+
+        for stat in stats:
+            if stat == 'insts':
+                print(f"{self.context.stats.insts}", file=f)
+            elif stat == 'hot':
+                print(f"{hot}", file=f)
+            elif stat == 'var':
+                print(f"{self.context.stats.vars}", file=f)
+
+        f.close()
+

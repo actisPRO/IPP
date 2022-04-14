@@ -25,6 +25,8 @@ if __name__ == '__main__':
         interpreter = Interpreter(args.source, args.input)
         interpreter.parse_xml()
         interpreter.execute()
+        if args.stats is not None:
+            interpreter.print_stats(args.stats, args.stats_order)
     except FileNotFoundError:
         Interpreter.error("specified file was not found.")
         exit(ExitCode.READ_ERROR.value)
