@@ -405,9 +405,9 @@ function generateHTML(array $results): string
                 $out = $result['actual'];
                 $ref = $result['expected'];
                 $testInfo .= "<p class=\"header\">Your output</p>
-        <textarea readonly>$out</textarea>";
+        <textarea class=\"diff\" readonly>$out</textarea>";
                 $testInfo .= "<p class=\"header\">Reference output</p>
-        <textarea readonly>$ref</textarea>";
+        <textarea class=\"diff\" readonly>$ref</textarea>";
             }
 
             if (key_exists('output', $result)) {
@@ -463,7 +463,7 @@ function generateHTML(array $results): string
         }
         textarea.diff {
             width: 80%;
-            height: 200px;
+            height: 150px;
         }
         textarea.out {
             width: 80%;
