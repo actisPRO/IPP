@@ -253,6 +253,12 @@ class Instruction:
         return
 
     def lts(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_logic(sym1, sym2, ctx, LogicType.LT, ['int', 'float', 'string', 'bool'])
+        ctx.stack.append(Variable('bool', result))
         return
 
     def gts(self, ctx: Context):
