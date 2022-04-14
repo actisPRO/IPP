@@ -174,6 +174,32 @@ function runInterpreter(string $test, string $source): array {
     );
 }
 
+function runParserAndInterpreter(string $test): array {
+    global $noclean;
+
+    $xml = runParser($test);
+    if ($xml['code'] != 0) {
+        return [
+            'success' => false,
+            'message' => 'Parsing failed',
+            'expected' => 0,
+            'actual' => $xml['code']
+        ];
+    }
+
+    $file = fopen("$test.temp.xml", 'w');
+    fwrite($file, $xml['out']);
+    fclose($file);
+
+    $out = runInterpreter($test, "$test.temp.xml");
+
+    if (!$noclean) {
+        unlink("$test.temp.xml");
+    }
+
+    return $out;
+}
+
 function compareXml(string $out, string $ref, string $delta): bool {
     global $jExamXmlPath;
     $sh = "java -jar $jExamXmlPath/jexamxml.jar $out $ref $delta $jExamXmlPath/options";
@@ -201,32 +227,12 @@ function runTest(string $path): array {
     global $parseOnly, $intOnly, $noclean;
 
     $out = [];
-    if ($parseOnly) {
+    if ($parseOnly)
         $out = runParser($path);
-    }
-    else if ($intOnly) {
+    else if ($intOnly)
         $out = runInterpreter($path, "$path.src");
-    } else {
-        $xml = runParser($path);
-        if ($xml['code'] != 0) {
-            return [
-                'success' => false,
-                'message' => 'Parsing failed',
-                'expected' => 0,
-                'actual' => $xml['code']
-            ];
-        }
-
-        $file = fopen("$path.temp.xml", 'w');
-        fwrite($file, $xml['out']);
-        fclose($file);
-
-        $out = runInterpreter($path, "$path.temp.xml");
-
-        if (!$noclean) {
-            unlink("$path.temp.xml");
-        }
-    }
+    else
+        $out = runParserAndInterpreter($path);
 
     $fs = fopen("$path.rc", 'r');
     $expected_ec = (int) fread($fs, 8);
@@ -268,8 +274,6 @@ function runTest(string $path): array {
                 'expected' => "",
                 'actual' => ""
             ];
-
-        $result = ['success' => true];
     }
 
     if (!$noclean) {
@@ -317,3 +321,4 @@ try {
 } catch (Error $err) {
     error(ExitCode::INTERNAL_ERROR, "Unexpected error:\n$err");
 }
+
