@@ -138,15 +138,16 @@ class Instruction:
         if self.opcode != 'DPRINT' and self.opcode != 'LABEL' and self.opcode != 'BREAK':
             ctx.stats.insts += 1
 
+    def set_var(self, ctx: Context, type: str, value: str, arg_index: int = 0):
+        var_data = self.args[0].value.split('@')
+        ctx.set_variable(var_data[0], var_data[1], type, value)
+
+    # region Frames and variables
     def move(self, ctx: Context):
         sym = ctx.get_variable_from_arg(self.args[1])
-
-        var_data = self.args[0].value.split('@')
-        ctx.set_variable(var_data[0], var_data[1], sym.type, sym.value)
-
+        self.set_var(ctx, sym.type, sym.value)
         return
 
-    # region Frames
     def createframe(self, ctx: Context):
         ctx.TF = dict()
         return
@@ -188,21 +189,22 @@ class Instruction:
     # endregion
 
     # region Stack
+    def check_stack_len(self, ctx: Context, required_stack_len: int):
+        if len(ctx.stack) < required_stack_len:
+            ctx.error(f'Stack has {len(ctx.stack)} elements but {self.opcode} requires {required_stack_len}')
+            exit(ExitCode.MISSING_VALUE.value)
+
     def pushs(self, ctx: Context):
         var = ctx.get_variable_from_arg(self.args[0])
+
         ctx.stack.append(var)
         return
 
     def pops(self, ctx: Context):
-        if len(ctx.stack) == 0:
-            ctx.error('Stack is empty.')
-            exit(ExitCode.MISSING_VALUE.value)
-
+        self.check_stack_len(ctx, 1)
         var = ctx.stack.pop()
 
-        var_data = self.args[0].value.split('@')
-        ctx.set_variable(var_data[0], var_data[1], var.type, var.value)
-
+        self.set_var(ctx, var.type, var.value)
         return
 
     def clears(self, ctx: Context):
@@ -210,6 +212,12 @@ class Instruction:
         return
 
     def adds(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
+        self.set_var(ctx, sym1.type, result)
         return
 
     def subs(self, ctx: Context):
