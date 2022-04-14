@@ -104,6 +104,7 @@ class Instruction:
 
         return
 
+    # region Frames
     def createframe(self, ctx: Context):
         ctx.TF = dict()
         return
@@ -142,7 +143,9 @@ class Instruction:
 
         ctx.current_pos = ctx.calls.pop()
         return
+    # endregion
 
+    # region Stack
     def pushs(self, ctx: Context):
         var = ctx.get_variable_from_arg(self.args[0])
         ctx.stack.append(var)
@@ -159,7 +162,9 @@ class Instruction:
         ctx.set_variable(var_data[0], var_data[1], var.type, var.value)
 
         return
+    # endregion
 
+    # region Maths
     def int2float(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         if sym1.type != 'int':
@@ -482,7 +487,9 @@ class Instruction:
         ctx.set_variable(var[0], var[1], 'int', ord(char))
 
         return
+    # endregion
 
+    # region I/O
     def read(self, ctx: Context):
         var = self.args[0].value.split('@')
         if self.args[1].value == 'int':
@@ -535,7 +542,9 @@ class Instruction:
         print(output, end='')
 
         return
+    # endregion
 
+    # region Strings
     def concat(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
@@ -597,13 +606,17 @@ class Instruction:
         var.value = var.value[:int(sym1.value)] + sym2.value[0] + var.value[int(sym1.value) + 1:]
         ctx.set_variable(var_data[0], var_data[1], 'string', var.value)
         return
+    # endregion
 
+    # region Types
     def type(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         var_data = self.args[0].value.split('@')
         ctx.set_variable(var_data[0], var_data[1], 'string', sym1.type)
         return
+    # endregion
 
+    # region Flow
     def label(self, ctx: Context):
         return
 
@@ -679,7 +692,9 @@ class Instruction:
         exit(val)
 
         return
+    # endregion
 
+    # region Debug
     def dprint(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[0])
         print(sym1.value, file=sys.stderr)
@@ -713,3 +728,4 @@ class Instruction:
 
         print(result, file=sys.stderr, end='')
         return
+    # endregion
