@@ -236,8 +236,8 @@ function compareXml(string $out, string $ref, string $delta): array
     global $jExamXmlPath;
     $sh = "java -jar $jExamXmlPath/jexamxml.jar $out $ref $delta $jExamXmlPath/options";
 
-    $result = exec($sh);
-    if (str_contains($result, "not identical")) {
+    $result = exec($sh, result_code: $resultCode);
+    if ($resultCode != 0) {
         $outContent = readFile($out);
         $refContent = readFile($ref);
         $difference = readFile($delta);
