@@ -264,7 +264,7 @@ function readFileContent(string $file): string
  * Compares exit codes
  * @param int $outExitCode Received exit code
  * @param string $ref Reference file with the expected exit code
- * @return array success - bool, message - if failed, info message, expected, actual
+ * @return array success - bool, message - if failed, info message
  */
 function compareExitCode(int $outExitCode, string $ref): array
 {
@@ -275,9 +275,7 @@ function compareExitCode(int $outExitCode, string $ref): array
     else
         return [
             'success' => false,
-            'message' => "Wrong exit code. Expected $expected_ec but got $outExitCode",
-            'expected' => $expected_ec,
-            'actual' => $outExitCode
+            'message' => "Wrong exit code. Expected $expected_ec but got $outExitCode"
         ];
 }
 
@@ -440,7 +438,14 @@ function generateHTML(array $results): string
         <p>Path: $path</p>
         <p><b>Message:</b> $message</p>";
 
-            //$html .= "<p class=\"header\">Output:</p>";
+            if (key_exists('expected', $result) && key_exists('actual', $result)) {
+                $out = $result['actual'];
+                $ref = $result['expected'];
+                $html .= "<p class=\"header\">Your output</p>
+        <textarea readonly>$out</textarea>";
+                $html .= "<p class=\"header\">Reference output</p>
+        <textarea readonly>$ref</textarea>";
+            }
 
             if (key_exists('difference', $result)) {
                 $difference = $result['difference'];
