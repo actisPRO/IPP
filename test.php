@@ -200,6 +200,22 @@ function runParserAndInterpreter(string $test): array {
     return $out;
 }
 
+function compareExitCode(string $outExitCode, string $ref): array {
+    $fs = fopen($ref, 'r');
+    $expected_ec = (int) fread($fs, 8);
+    fclose($fs);
+
+    if ($expected_ec == $outExitCode)
+        return ['success' => true];
+    else
+        return [
+            'success' => false,
+            'message' => 'Wrong exit code',
+            'expected' => $expected_ec,
+            'actual' => $outExitCode
+        ];
+}
+
 function compareXml(string $out, string $ref, string $delta): bool {
     global $jExamXmlPath;
     $sh = "java -jar $jExamXmlPath/jexamxml.jar $out $ref $delta $jExamXmlPath/options";
@@ -212,7 +228,7 @@ function compareXml(string $out, string $ref, string $delta): bool {
     }
 };
 
-function compareText(string $out, string $ref): bool {
+function compareText(int $out, string $ref): bool {
     $sh = "diff $out $ref";
 
     $result = exec($sh);
@@ -223,37 +239,27 @@ function compareText(string $out, string $ref): bool {
     }
 }
 
-function runTest(string $path): array {
+function runTest(string $test): array {
     global $parseOnly, $intOnly, $noclean;
 
     $out = [];
     if ($parseOnly)
-        $out = runParser($path);
+        $out = runParser($test);
     else if ($intOnly)
-        $out = runInterpreter($path, "$path.src");
+        $out = runInterpreter($test, "$test.src");
     else
-        $out = runParserAndInterpreter($path);
+        $out = runParserAndInterpreter($test);
 
-    $fs = fopen("$path.rc", 'r');
-    $expected_ec = (int) fread($fs, 8);
-    fclose($fs);
+    $result = compareExitCode($out['code'], "$test.rc");
+    if (!$result['success'])
+        return $result;
 
-    if ($expected_ec != $out['code']) {
-        return [
-            'success' => false,
-            'message' => 'Wrong exit code',
-            'expected' => $expected_ec,
-            'actual' => $out['code']
-        ];
-    }
-
-    $fs = fopen("$path.temp.out", 'w');
+    $fs = fopen("$test.temp.out", 'w');
     fwrite($fs, $out['out']);
     fclose($fs);
 
-    $result = [];
     if ($parseOnly) {
-        $compare = compareXml("$path.temp.out", "$path.out", "$path.delta");
+        $compare = compareXml("$test.temp.out", "$test.out", "$test.delta");
         if ($compare)
             $result = ['success' => true];
         else
@@ -264,7 +270,7 @@ function runTest(string $path): array {
                 'actual' => ""
             ];
     } else {
-        $compare = compareText("$path.temp.out", "$path.out");
+        $compare = compareText("$test.temp.out", "$test.out");
         if ($compare)
             $result = ['success' => true];
         else
@@ -277,9 +283,9 @@ function runTest(string $path): array {
     }
 
     if (!$noclean) {
-        unlink("$path.temp.out");
+        unlink("$test.temp.out");
         if ($parseOnly)
-            unlink("$path.delta");
+            unlink("$test.delta");
     }
 
     return $result;
