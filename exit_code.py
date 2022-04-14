@@ -13,3 +13,4 @@ class ExitCode(Enum):
     MISSING_VALUE = 56
     BAD_OPERAND_VALUE = 57
     BAD_STRING = 58
+    INTERNAL_ERROR = 99

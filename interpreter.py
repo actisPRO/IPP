@@ -28,7 +28,12 @@ class Interpreter:
             xml = self.__read_source_from_stdin()
         else:
             xml = source_file
-        self.xml_tree = ET.parse(xml)
+
+        try:
+            self.xml_tree = ET.parse(xml)
+        except ET.ParseError:
+            self.error('Invalid XML file.')
+            exit(ExitCode.UNEXPECTED_XML.value)
 
         if input_file is None:
             self.input_stream = sys.stdin
@@ -42,6 +47,10 @@ class Interpreter:
 
     def execute(self):
         self.context.execute()
+
+    @staticmethod
+    def error(message: str):
+        print(f'ERROR: {message}', file=sys.stderr)
 
     def parse_xml(self):
         root = self.xml_tree.getroot()

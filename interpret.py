@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.source is None and args.input is None:
-        print('ERROR: at least one argument (--source or --input) must be set.', file=sys.stderr)
+        Interpreter.error('at least one argument (--source or --input) must be set.')
         exit(ExitCode.MISSING_ARGUMENT.value)
 
     try:
@@ -20,5 +20,9 @@ if __name__ == '__main__':
         interpreter.parse_xml()
         interpreter.execute()
     except FileNotFoundError:
-        print('ERROR: specified file was not found.', file=sys.stderr)
+        Interpreter.error("specified file was not found.")
         exit(ExitCode.READ_ERROR.value)
+    except Exception as e:
+        Interpreter.error(f"Unexpected error:\n{e}")
+        exit(ExitCode.INTERNAL_ERROR.value)
+

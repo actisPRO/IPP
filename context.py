@@ -27,13 +27,16 @@ class Context:
         for i in self.instructions:
             if i.opcode == 'LABEL':
                 if i.args[0].value in self.labels.keys():
-                    print(f'ERROR: label {i.args[0].value} is defined twice.', file=sys.stderr)
+                    self.error(f'label {i.args[0].value} is defined twice.', True)
                     exit(ExitCode.SEMANTIC_ERROR.value)
 
                 self.labels[i.args[0].value] = int(i.order)
 
-    def error(self, message):
-        print(f'ERROR (instruction #{self.current_pos + 1}): {message}', file=sys.stderr)
+    def error(self, message: str, no_instruction: bool = False):
+        if not no_instruction:
+            print(f'ERROR (instruction #{self.current_pos + 1}): {message}', file=sys.stderr)
+        else:
+            print(f'ERROR: {message}', file=sys.stderr)
 
     def get_variable(self, frame: str, name: str) -> Variable:
         if frame == 'GF':
