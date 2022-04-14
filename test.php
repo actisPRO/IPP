@@ -23,7 +23,7 @@ enum ExitCode: int
  */
 function error(ExitCode $exitCode, string $message)
 {
-    fwrite(STDERR, "ERROR: " . $message);
+    fwrite(STDERR, "ERROR: " . $message . "\n");
     exit($exitCode->value);
 }
 
@@ -382,6 +382,48 @@ function runTest(string $test): array
  */
 function generateHTML(array $results): string
 {
+    $case = 1;
+    $failed = 0;
+    $testInfo = "";
+    foreach ($results as $result) {
+        $testInfo .= "<div class=\"test-result\">";
+        if ($result['success']) {
+            $path = $result['path'];
+            $testInfo .= "<p class=\"header\">Test case #$case: <span class=\"success\">success</span></p>
+        <p>Path: $path</p>";
+        } else {
+            $failed += 1;
+            $path = $result['path'];
+            $message = $result['message'];
+
+            $testInfo .= "<p class=\"header\">Test case #$case: <span class=\"fail\">fail</span></p>
+        <p>Path: $path</p>
+        <p><b>Message:</b> $message</p>";
+
+            if (key_exists('expected', $result) && key_exists('actual', $result)) {
+                $out = $result['actual'];
+                $ref = $result['expected'];
+                $testInfo .= "<p class=\"header\">Your output</p>
+        <textarea readonly>$out</textarea>";
+                $testInfo .= "<p class=\"header\">Reference output</p>
+        <textarea readonly>$ref</textarea>";
+            }
+
+            if (key_exists('difference', $result)) {
+                $difference = $result['difference'];
+                $testInfo .= "<p class=\"header\">Difference</p>
+        <textarea readonly>$difference</textarea>";
+            }
+        }
+
+        $testInfo .= "</div>";
+        $case += 1;
+    }
+
+    $total = $case - 1;
+    $passed = $total - $failed;
+    $header = "<h2>Tests finished: $passed passed, $failed failed, $total total</h2>";
+
     $html = "<!DOCTYPE html>
 <html lang=\"en\">
 <head>
@@ -420,47 +462,12 @@ function generateHTML(array $results): string
 </head>
 <body>
 <main>
-    <h1>Test results</h1>";
-
-    $case = 1;
-    foreach ($results as $result) {
-        $html .= "<div class=\"test-result\">";
-
-        if ($result['success']) {
-            $path = $result['path'];
-            $html .= "<p class=\"header\">Test case #$case: <span class=\"success\">success</span></p>
-        <p>Path: $path</p>";
-        } else {
-            $path = $result['path'];
-            $message = $result['message'];
-
-            $html .= "<p class=\"header\">Test case #$case: <span class=\"fail\">fail</span></p>
-        <p>Path: $path</p>
-        <p><b>Message:</b> $message</p>";
-
-            if (key_exists('expected', $result) && key_exists('actual', $result)) {
-                $out = $result['actual'];
-                $ref = $result['expected'];
-                $html .= "<p class=\"header\">Your output</p>
-        <textarea readonly>$out</textarea>";
-                $html .= "<p class=\"header\">Reference output</p>
-        <textarea readonly>$ref</textarea>";
-            }
-
-            if (key_exists('difference', $result)) {
-                $difference = $result['difference'];
-                $html .= "<p class=\"header\">Difference</p>
-        <textarea readonly>$difference</textarea>";
-            }
-        }
-
-        $html .= "</div>";
-        $case += 1;
-    }
-
-    $html .= "</main>
+    $header
+    $testInfo
+</main>
 </body>
 </html>";
+
     return $html;
 }
 
