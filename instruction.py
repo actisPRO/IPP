@@ -3,9 +3,10 @@ import sys
 from argument import Argument
 from context import Context
 from exit_code import ExitCode
+from logic import LogicType, LogicEvaluator
 from type_checker import TypeChecker
 from variable import Variable
-from arithmetics import ArithmeticEvaluation, ArithmeticsType
+from arithmetics import ArithmeticEvaluator, ArithmeticsType
 
 
 class Instruction:
@@ -305,7 +306,7 @@ class Instruction:
             value1 = var1.float_value()
             value2 = var2.float_value()
 
-        return ArithmeticEvaluation(value1, value2, op_type).eval()
+        return ArithmeticEvaluator(value1, value2, op_type).eval()
 
     def int2float(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
@@ -387,6 +388,19 @@ class Instruction:
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
         return
+
+    def perform_logic(self, var1: Variable, var2: Variable, ctx: Context, op_type: LogicType, allowed_types) -> bool:
+        TypeChecker.full_check(ctx, self.opcode, var1, allowed_types)
+
+        value1 = var1.unwrap()
+        value2 = None
+
+        if var2 is not None:
+            TypeChecker.full_check(ctx, self.opcode, var2, allowed_types)
+            TypeChecker.var_type_check(ctx, self.opcode, var1, [var2.type, 'nil'])  # args must be of the same type or nil
+            value2 = var2.unwrap()
+
+        return LogicEvaluator(op_type, value1, value2).eval()
 
     def lt(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])

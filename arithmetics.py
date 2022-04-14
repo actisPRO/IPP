@@ -9,7 +9,7 @@ class ArithmeticsType(Enum):
     DIV = 4
 
 
-class ArithmeticEvaluation:
+class ArithmeticEvaluator:
     def __init__(self, value1: int or float, value2: int or float, ot: ArithmeticsType):
         self.v1 = value1
         self.v2 = value2

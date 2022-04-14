@@ -9,6 +9,18 @@ class Variable:
     def __str__(self):
         return f"{self.type}@{self.value}"
 
+    def unwrap(self):
+        if self.type == 'int':
+            return int(self.value)
+        elif self.type == 'float':
+            return self.float_value()
+        elif self.type == 'bool':
+            return self.value.lower() == 'true'
+        elif self.type == 'string':
+            return self.value
+        else:
+            return None
+
     def float_value(self) -> float:
         if self.type != 'float' and self.type != 'int':
             raise ValueError()

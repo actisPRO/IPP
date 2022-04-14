@@ -27,10 +27,10 @@ class TypeChecker:
     @staticmethod
     def full_check(ctx: Context, caller_name: str, variable: Variable, accepted_types: list):
         TypeChecker.str_convertable_check(ctx, variable)
-        TypeChecker.var_type_check(accepted_types, caller_name, ctx, variable)
+        TypeChecker.var_type_check(ctx, caller_name, variable, accepted_types)
 
     @staticmethod
-    def var_type_check(accepted_types, caller_name, ctx, variable):
+    def var_type_check(ctx, caller_name, variable, accepted_types):
         type_check = False
         for t in accepted_types:
             if variable.type == t:

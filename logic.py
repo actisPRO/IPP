@@ -10,13 +10,13 @@ class LogicType(Enum):
     NOT = 5
 
 
-class LogicEvaluation:
+class LogicEvaluator:
     def __init__(self, ot: LogicType, value1, value2=None):
         self.v1 = value1
         self.v2 = value2
         self.type = ot
 
-    def eval(self) -> int or float:
+    def eval(self) -> bool:
         funcs = {
             LogicType.LT: lambda a, b: a < b,
             LogicType.GT: lambda a, b: a > b,
