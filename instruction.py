@@ -138,6 +138,7 @@ class Instruction:
         if self.opcode != 'DPRINT' and self.opcode != 'LABEL' and self.opcode != 'BREAK':
             ctx.stats.insts += 1
 
+    # Gets a variable from its identifier in the argument and stores there the specified value
     def set_var(self, ctx: Context, type: str, value: str, arg_index: int = 0):
         var_data = self.args[0].value.split('@')
         ctx.set_variable(var_data[0], var_data[1], type, value)
@@ -221,12 +222,33 @@ class Instruction:
         return
 
     def subs(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
+        self.set_var(ctx, sym1.type, result)
         return
 
     def muls(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
+        self.set_var(ctx, sym1.type, result)
         return
 
     def idivs(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+        if sym2.float_value() == 0:
+            ctx.error("you can't divide by zero =(")
+            exit(ExitCode.BAD_OPERAND_VALUE.value)
+
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
+        self.set_var(ctx, sym1.type, result)
         return
 
     def lts(self, ctx: Context):
