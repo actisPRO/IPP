@@ -319,6 +319,19 @@ class Instruction:
         return
 
     def stri2ints(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym1 = ctx.stack.pop()
+        sym2 = ctx.stack.pop()
+
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['string'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['int'])
+
+        if int(sym2.value) < 0 or int(sym2.value) >= len(sym1.value):
+            ctx.error('index is out of range.')
+            exit(ExitCode.BAD_STRING_OPERATION.value)
+
+        char = sym1.value[int(sym2.value)]
+        ctx.stack.append(Variable('int', ord(char)))
         return
 
     def jumpifeqs(self, ctx: Context):
@@ -508,6 +521,7 @@ class Instruction:
         except ValueError:
             ctx.error(f'{sym1.value} is an incorrect Unicode code.')
             exit(ExitCode.BAD_STRING_OPERATION.value)
+        return
 
     def stri2int(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
@@ -523,7 +537,6 @@ class Instruction:
         char = sym1.value[int(sym2.value)]
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], 'int', ord(char))
-
         return
     # endregion
 
