@@ -218,7 +218,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
         ctx.stack.append(Variable(sym1.type, result))
         return
 
@@ -227,7 +227,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
         ctx.stack.append(Variable(sym1.type, result))
         return
 
@@ -236,7 +236,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
         ctx.stack.append(Variable(sym1.type, result))
         return
 
@@ -248,7 +248,7 @@ class Instruction:
             ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
         ctx.stack.append(Variable(sym1.type, result))
         return
 
@@ -257,7 +257,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_logic(sym1, sym2, ctx, LogicType.LT, ['int', 'float', 'string', 'bool'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.LT, ['int', 'float', 'string', 'bool'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -266,7 +266,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_logic(sym1, sym2, ctx, LogicType.GT, ['int', 'float', 'string', 'bool'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.GT, ['int', 'float', 'string', 'bool'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -275,7 +275,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -284,7 +284,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_logic(sym1, sym2, ctx, LogicType.AND, ['bool', 'nil'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.AND, ['bool', 'nil'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -293,7 +293,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.perform_logic(sym1, sym2, ctx, LogicType.OR, ['bool', 'nil'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.OR, ['bool', 'nil'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -301,7 +301,7 @@ class Instruction:
         self.check_stack_len(ctx, 1)
         sym1 = ctx.stack.pop()
 
-        result = self.perform_logic(sym1, None, ctx, LogicType.NOT, ['bool'])
+        result = self.calc_logic(sym1, None, ctx, LogicType.NOT, ['bool'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -320,7 +320,7 @@ class Instruction:
     # endregion
 
     # region Maths
-    def perform_arithmetics(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType, allowed_types=None) -> int or float:
+    def calc_arithmetics(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType, allowed_types=None) -> int or float:
         if allowed_types is None:
             allowed_types = ['int', 'float']
 
@@ -372,7 +372,7 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -382,7 +382,7 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -392,7 +392,7 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -405,7 +405,7 @@ class Instruction:
             ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -418,13 +418,13 @@ class Instruction:
             ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.DIV, allowed_types=['float'])
+        result = self.calc_arithmetics(sym1, sym2, ctx, ArithmeticsType.DIV, allowed_types=['float'])
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
-    def perform_logic(self, var1: Variable, var2: Variable or None, ctx: Context, op_type: LogicType, allowed_types) -> bool:
+    def calc_logic(self, var1: Variable, var2: Variable or None, ctx: Context, op_type: LogicType, allowed_types) -> bool:
         TypeChecker.full_check(ctx, self.opcode, var1, allowed_types)
 
         value1 = var1.unwrap()
