@@ -452,7 +452,7 @@ class Instruction:
             ctx.set_variable(var[0], var[1], 'string', result)
         except ValueError:
             ctx.error(f'{sym1.value} is an incorrect Unicode code.')
-            exit(ExitCode.BAD_STRING.value)
+            exit(ExitCode.BAD_STRING_OPERATION.value)
 
     def stri2int(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
@@ -462,7 +462,7 @@ class Instruction:
             exit(ExitCode.BAD_OPERAND_TYPE.value)
         if int(sym2.value) < 0 or int(sym2.value) >= len(sym1.value):
             ctx.error('index is out of range.')
-            exit(ExitCode.BAD_STRING.value)
+            exit(ExitCode.BAD_STRING_OPERATION.value)
 
         char = sym1.value[int(sym2.value)]
         var = self.args[0].value.split('@')
@@ -544,7 +544,7 @@ class Instruction:
             exit(ExitCode.BAD_OPERAND_TYPE.value)
         if int(sym2.value) < 0 or int(sym2.value) >= len(sym1.value):
             ctx.error('Index is out of range.')
-            exit(ExitCode.BAD_STRING.value)
+            exit(ExitCode.BAD_STRING_OPERATION.value)
 
         result = sym1.value[int(sym2.value)]
 
@@ -562,10 +562,10 @@ class Instruction:
             exit(ExitCode.BAD_OPERAND_TYPE.value)
         if int(sym1.value) < 0 or int(sym1.value) >= len(var.value):
             ctx.error('Index is out of range.')
-            exit(ExitCode.BAD_STRING.value)
+            exit(ExitCode.BAD_STRING_OPERATION.value)
         if sym2.value == '':
             ctx.error('Char can\'t be empty.')
-            exit(ExitCode.BAD_STRING.value)
+            exit(ExitCode.BAD_STRING_OPERATION.value)
 
         var.value = var.value[:int(sym1.value)] + sym2.value[0] + var.value[int(sym1.value) + 1:]
         ctx.set_variable(var_data[0], var_data[1], 'string', var.value)

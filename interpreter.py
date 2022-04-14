@@ -33,7 +33,7 @@ class Interpreter:
             self.xml_tree = ET.parse(xml)
         except ET.ParseError:
             self.error('Invalid XML file.')
-            exit(ExitCode.UNEXPECTED_XML.value)
+            exit(ExitCode.BAD_XML.value)
 
         if input_file is None:
             self.input_stream = sys.stdin
@@ -80,7 +80,7 @@ class Interpreter:
         except Exception as e:
             print(str(e), file=sys.stderr)
             print("Unexpected error while sorting instructions.")
-            exit(ExitCode.UNEXPECTED_XML.value)
+            exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
         for child in root:
             try:
@@ -88,42 +88,42 @@ class Interpreter:
             except Exception as e:
                 print(str(e) + "\n", file=sys.stderr)
                 print("Unexpected error while sorting arguments", file=sys.stderr)
-                exit(ExitCode.UNEXPECTED_XML.value)
+                exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
     @staticmethod
     def validate_xml(root: ET.Element):
         if root.tag != 'program':
             print(f"ERROR: Expected {root.tag} to be program.", file=sys.stderr)
-            exit(ExitCode.UNEXPECTED_XML.value)
+            exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
         if root.attrib['language'] is None or root.attrib['language'].lower() != 'ippcode22':
             print(f'ERROR: Expected root to containt attribute language with value "IPPcode22".', file=sys.stderr)
-            exit(ExitCode.UNEXPECTED_XML.value)
+            exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
         expected_order = 1
         for child in root:
             if child.tag != 'instruction':
                 print(f'ERROR: Unexpected XML-tag {child.tag}. Expected: instruction', file=sys.stderr)
-                exit(ExitCode.UNEXPECTED_XML.value)
+                exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
             attributes = list(child.attrib.keys())
             if not ('order' in attributes) or not ('opcode' in attributes):
                 print('ERROR: Every instruction should contain opcode and order atrtibutes.', file=sys.stderr)
-                exit(ExitCode.UNEXPECTED_XML.value)
+                exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
             if int(child.attrib['order']) != expected_order:
                 print(f'ERROR: Expected order to be {expected_order} but it was {child.attrib["order"]}.',
                       file=sys.stderr)
-                exit(ExitCode.UNEXPECTED_XML.value)
+                exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
             for arg in child:
                 if not (re.match(r"arg[123]", arg.tag)):
                     print(f'ERROR: Expected {arg.tag} to be arg1, arg2 or arg3.', file=sys.stderr)
-                    exit(ExitCode.UNEXPECTED_XML.value)
+                    exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
                 arg_attrs = list(arg.attrib)
                 if not ('type' in arg_attrs):
                     print(f'ERROR: {arg.tag} of instruction #{child.attrib["order"]} does not contain type info.',
                           file=sys.stderr)
-                    exit(ExitCode.UNEXPECTED_XML.value)
+                    exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
             expected_order += 1
