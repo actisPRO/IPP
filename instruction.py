@@ -320,8 +320,8 @@ class Instruction:
 
     def stri2ints(self, ctx: Context):
         self.check_stack_len(ctx, 2)
-        sym1 = ctx.stack.pop()
         sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
 
         TypeChecker.full_check(ctx, self.opcode, sym1, ['string'])
         TypeChecker.full_check(ctx, self.opcode, sym2, ['int'])
@@ -335,9 +335,25 @@ class Instruction:
         return
 
     def jumpifeqs(self, ctx: Context):
+        self.check_stack_len(ctx, 3)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+        label = self.args[0].value()
+
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        if result:
+            ctx.jump_to_label(label)
         return
 
     def jumpifneqs(self, ctx: Context):
+        self.check_stack_len(ctx, 3)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+        label = self.args[0].value()
+
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        if not result:
+            ctx.jump_to_label(label)
         return
 
     # endregion
