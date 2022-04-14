@@ -4,6 +4,8 @@ from argument import Argument
 from context import Context
 from exit_code import ExitCode
 from type_checker import TypeChecker
+from variable import Variable
+from operation import ArithmeticEvaluation, ArithmeticsType
 
 
 class Instruction:
@@ -165,6 +167,26 @@ class Instruction:
     # endregion
 
     # region Maths
+    def perform_operation(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType) -> int or float:
+        TypeChecker.full_check(ctx, self.opcode, var1, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, var2, ['int', 'float'])
+
+        if var1.type != var2.type:
+            ctx.error(f"operands must have the same type. Current types: {var1.type} and {var2.type}")
+            exit(ExitCode.BAD_OPERAND_TYPE.value)
+
+        value1 = None
+        value2 = None
+
+        if var1.type == 'int':
+            value1 = int(var1.value)
+            value2 = int(var2.value)
+        elif var2.type == 'float':
+            value1 = var1.float_value()
+            value2 = var2.float_value()
+
+        return ArithmeticEvaluation(value1, value2, op_type).eval()
+
     def int2float(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         if sym1.type != 'int':
@@ -194,36 +216,18 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['int', 'float'])
-
-        if sym1.type == 'int':
-            val1 = int(sym1.value)
-        else:
-            val1 = sym1.float_value()
-
-        if sym2.type == 'int':
-            val2 = int(sym2.value)
-        else:
-            val2 = sym2.float_value()
-        result = val1 + val2
-
-        if sym1.type == 'float' or sym2.type == 'float':
-            var_type = 'float'
-        else:
-            var_type = 'int'
+        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.ADD)
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], var_type, result)
-
+        ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
     def sub(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
 
         if sym1.type == 'int':
             val1 = int(sym1.value)
@@ -249,8 +253,8 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
 
         if sym1.type == 'int':
             val1 = int(sym1.value)
@@ -276,8 +280,8 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
 
         if float(sym2.value) == 0:
             ctx.error('Can\'t divde by zero.')
@@ -307,8 +311,8 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
 
         if float(sym2.value) == 0:
             ctx.error('Can\'t divde by zero.')
@@ -336,8 +340,8 @@ class Instruction:
             ctx.error('LT only accepts parameters with equal types.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, [sym1.type])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, [sym2.type])
+        TypeChecker.full_check(ctx, self.opcode, sym1, [sym1.type])
+        TypeChecker.full_check(ctx, self.opcode, sym2, [sym2.type])
 
         result = False
         if sym1.type == 'int':
@@ -365,8 +369,8 @@ class Instruction:
             ctx.error('GT only accepts parameters with equal types.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, [sym1.type])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, [sym2.type])
+        TypeChecker.full_check(ctx, self.opcode, sym1, [sym1.type])
+        TypeChecker.full_check(ctx, self.opcode, sym2, [sym2.type])
 
         result = False
         if sym1.type == 'int':
@@ -403,8 +407,8 @@ class Instruction:
             ctx.error('EQ only accepts parameters with equal types.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, [sym1.type])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, [sym2.type])
+        TypeChecker.full_check(ctx, self.opcode, sym1, [sym1.type])
+        TypeChecker.full_check(ctx, self.opcode, sym2, [sym2.type])
 
         if sym1.type == 'int':
             result = int(sym1.value) == int(sym2.value)
@@ -423,8 +427,8 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['bool'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['bool'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['bool'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['bool'])
 
         result = sym1.value == 'true' and sym2.value == 'true'
         result = str(result).lower()
@@ -437,8 +441,8 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['bool'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['bool'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['bool'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['bool'])
 
         result = sym1.value == 'true' or sym2.value == 'true'
         result = str(result).lower()
@@ -450,7 +454,7 @@ class Instruction:
     def exec_not(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['bool'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['bool'])
 
         result = sym1.value != 'true'
         result = str(result).lower()
@@ -461,7 +465,7 @@ class Instruction:
 
     def int2char(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['int'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['int'])
 
         try:
             result = chr(int(sym1.value))
@@ -475,8 +479,8 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_type_check(ctx, self.opcode, sym1, ['string'])
-        TypeChecker.full_type_check(ctx, self.opcode, sym2, ['int'])
+        TypeChecker.full_check(ctx, self.opcode, sym1, ['string'])
+        TypeChecker.full_check(ctx, self.opcode, sym2, ['int'])
 
         if int(sym2.value) < 0 or int(sym2.value) >= len(sym1.value):
             ctx.error('index is out of range.')
@@ -526,7 +530,7 @@ class Instruction:
 
     def write(self, ctx: Context):
         sym = ctx.get_variable_from_arg(self.args[0])
-        TypeChecker.full_type_check(ctx, self.opcode, sym, ['int', 'float', 'bool', 'nil', 'string'])
+        TypeChecker.full_check(ctx, self.opcode, sym, ['int', 'float', 'bool', 'nil', 'string'])
 
         output = sym.value
         if sym.type == 'nil':
