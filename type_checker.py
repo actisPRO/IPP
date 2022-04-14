@@ -18,7 +18,11 @@ class TypeChecker:
             float(const_val)
             return True
         except ValueError:
-            return False
+            try:
+                float.fromhex(const_val)
+                return True
+            except ValueError:
+                return False
 
     @staticmethod
     def full_type_check(ctx: Context, caller_name: str, variable: Variable, accepted_types: list):

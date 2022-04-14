@@ -508,17 +508,20 @@ class Instruction:
 
     def write(self, ctx: Context):
         sym = ctx.get_variable_from_arg(self.args[0])
+        TypeChecker.full_type_check(ctx, self.opcode, sym, ['int', 'float', 'bool', 'nil', 'string'])
+
+        output = sym.value
         if sym.type == 'nil':
-            print('')
-        elif sym.type == 'bool':
-            print(sym.value)
+            output = ''
         elif sym.type == 'string':
             for i in range(999):
                 number = "\\{:03d}".format(i)
                 sym.value = sym.value.replace(number, chr(i))
-            print(sym.value, end='')
-        else:
-            print(sym.value, end='')
+            output = sym.value
+        elif sym.type == 'float':
+            output = sym.float_value().hex()
+
+        print(output, end='')
 
         return
 
