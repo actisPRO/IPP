@@ -216,33 +216,63 @@ function compareExitCode(string $outExitCode, string $ref): array {
         ];
 }
 
-function compareXml(string $out, string $ref, string $delta): bool {
+function readFile(string $file): string {
+    $fs = fopen($file, 'r');
+    $res = "";
+    while ($line = fgets($fs))
+        $res .= $line;
+    fclose($fs);
+
+    return $res;
+}
+
+function compareXml(string $out, string $ref, string $delta): array {
     global $jExamXmlPath;
     $sh = "java -jar $jExamXmlPath/jexamxml.jar $out $ref $delta $jExamXmlPath/options";
 
     $result = exec($sh);
-    if (str_contains($result, "not identical")) {
-        return false;
-    } else {
-        return true;
+    if (str_contains($result, "not identical"))
+    {
+        $outContent = readFile($out);
+        $refContent = readFile($ref);
+        $difference = readFile($delta);
+
+        return [
+            'success' => false,
+            'message' => 'XML output is not equal to the reference output',
+            'expected' => $refContent,
+            'actual' => $outContent,
+            'difference' => $difference
+        ];
     }
+    else
+        return ['success' => true];
 };
 
-function compareText(int $out, string $ref): bool {
+function compareText(string $out, string $ref): array {
     $sh = "diff $out $ref";
 
-    $result = exec($sh);
-    if ($result == '') {
-        return true;
-    } else {
-        return false;
+    $result = exec($sh, $execOut);
+    $difference = implode("\n", $execOut);
+    if ($result != '') {
+        $outContent = readFile($out);
+        $refContent = readFile($ref);
+
+        return [
+            'success' => false,
+            'message' => 'Output is not equal to the reference output',
+            'expected' => $refContent,
+            'actual' => $outContent,
+            'difference' => $difference
+        ];
     }
+    else
+        return ['success' => true];
 }
 
 function runTest(string $test): array {
     global $parseOnly, $intOnly, $noclean;
 
-    $out = [];
     if ($parseOnly)
         $out = runParser($test);
     else if ($intOnly)
@@ -258,29 +288,10 @@ function runTest(string $test): array {
     fwrite($fs, $out['out']);
     fclose($fs);
 
-    if ($parseOnly) {
-        $compare = compareXml("$test.temp.out", "$test.out", "$test.delta");
-        if ($compare)
-            $result = ['success' => true];
-        else
-            $result = [
-                'success' => false,
-                'message' => 'XML files are not equal',
-                'expected' => "",
-                'actual' => ""
-            ];
-    } else {
-        $compare = compareText("$test.temp.out", "$test.out");
-        if ($compare)
-            $result = ['success' => true];
-        else
-            $result = [
-                'success' => false,
-                'message' => 'Output files are not equal',
-                'expected' => "",
-                'actual' => ""
-            ];
-    }
+    if ($parseOnly)
+        $result = compareXml("$test.temp.out", "$test.out", "$test.delta");
+    else
+        $result = compareText("$test.temp.out", "$test.out");
 
     if (!$noclean) {
         unlink("$test.temp.out");
