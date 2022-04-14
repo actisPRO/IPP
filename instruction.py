@@ -262,18 +262,47 @@ class Instruction:
         return
 
     def gts(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_logic(sym1, sym2, ctx, LogicType.GT, ['int', 'float', 'string', 'bool'])
+        ctx.stack.append(Variable('bool', result))
         return
 
     def eqs(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        ctx.stack.append(Variable('bool', result))
         return
 
     def ands(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_logic(sym1, sym2, ctx, LogicType.AND, ['bool', 'nil'])
+        ctx.stack.append(Variable('bool', result))
         return
 
     def ors(self, ctx: Context):
+        self.check_stack_len(ctx, 2)
+        sym2 = ctx.stack.pop()
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_logic(sym1, sym2, ctx, LogicType.OR, ['bool', 'nil'])
+        ctx.stack.append(Variable('bool', result))
         return
 
     def nots(self, ctx: Context):
+        self.check_stack_len(ctx, 1)
+        sym1 = ctx.stack.pop()
+
+        result = self.perform_logic(sym1, None, ctx, LogicType.NOT, ['bool'])
+        ctx.stack.append(Variable('bool', result))
         return
 
     def int2chars(self, ctx: Context):
@@ -395,7 +424,7 @@ class Instruction:
         ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
-    def perform_logic(self, var1: Variable, var2: Variable, ctx: Context, op_type: LogicType, allowed_types) -> bool:
+    def perform_logic(self, var1: Variable, var2: Variable or None, ctx: Context, op_type: LogicType, allowed_types) -> bool:
         TypeChecker.full_check(ctx, self.opcode, var1, allowed_types)
 
         value1 = var1.unwrap()
@@ -403,7 +432,10 @@ class Instruction:
 
         if var2 is not None:
             TypeChecker.full_check(ctx, self.opcode, var2, allowed_types)
-            TypeChecker.var_type_check(ctx, self.opcode, var1, [var2.type, 'nil'])  # args must be of the same type or nil
+            if var2.type != 'nil':
+                TypeChecker.var_type_check(ctx, self.opcode, var1, [var2.type, 'nil'])  # args must be of the same type or nil
+            else:
+                TypeChecker.var_type_check(ctx, self.opcode, var2, [var1.type, 'nil'])
             value2 = var2.unwrap()
 
         return LogicEvaluator(op_type, value1, value2).eval()
