@@ -5,7 +5,7 @@ from context import Context
 from exit_code import ExitCode
 from type_checker import TypeChecker
 from variable import Variable
-from operation import ArithmeticEvaluation, ArithmeticsType
+from arithmetics import ArithmeticEvaluation, ArithmeticsType
 
 
 class Instruction:
