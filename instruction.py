@@ -140,14 +140,14 @@ class Instruction:
             ctx.stats.insts += 1
 
     # Gets a variable from its identifier in the argument and stores there the specified value
-    def set_var(self, ctx: Context, type: str, value: str, arg_index: int = 0):
+    def update_var_in_args(self, ctx: Context, type: str, value, arg_index: int = 0):
         var_data = self.args[0].value.split('@')
         ctx.set_variable(var_data[0], var_data[1], type, value)
 
     # region Frames and variables
     def move(self, ctx: Context):
         sym = ctx.get_variable_from_arg(self.args[1])
-        self.set_var(ctx, sym.type, sym.value)
+        self.update_var_in_args(ctx, sym.type, sym.value)
         return
 
     def createframe(self, ctx: Context):
@@ -206,7 +206,7 @@ class Instruction:
         self.check_stack_len(ctx, 1)
         var = ctx.stack.pop()
 
-        self.set_var(ctx, var.type, var.value)
+        self.update_var_in_args(ctx, var.type, var.value)
         return
 
     def clears(self, ctx: Context):
@@ -284,7 +284,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.calc_logic(sym1, sym2, ctx, LogicType.AND, ['bool', 'nil'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.AND, ['bool'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -293,7 +293,7 @@ class Instruction:
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
 
-        result = self.calc_logic(sym1, sym2, ctx, LogicType.OR, ['bool', 'nil'])
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.OR, ['bool'])
         ctx.stack.append(Variable('bool', result))
         return
 
@@ -443,131 +443,48 @@ class Instruction:
     def lt(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        if sym1.type != sym2.type:
-            ctx.error('LT only accepts parameters with equal types.')
-            exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, [sym1.type])
-        TypeChecker.full_check(ctx, self.opcode, sym2, [sym2.type])
-
-        result = False
-        if sym1.type == 'int':
-            result = int(sym1.value) < int(sym2.value)
-        elif sym1.type == 'float':
-            result = sym1.float_value() < sym2.float_value()
-        elif sym1.type == 'bool':
-            if sym1.value == 'false' and sym2.value == 'true':
-                result = True
-            else:
-                result = False
-        elif sym1.type == 'string':
-            result = sym1.value < sym2.value
-
-        result = str(result).lower()
-
-        var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'bool', result)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.LT, ['int', 'float', 'string', 'bool'])
+        self.update_var_in_args(ctx, 'bool', result)
         return
 
     def gt(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        if sym1.type != sym2.type:
-            ctx.error('GT only accepts parameters with equal types.')
-            exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, [sym1.type])
-        TypeChecker.full_check(ctx, self.opcode, sym2, [sym2.type])
-
-        result = False
-        if sym1.type == 'int':
-            result = int(sym1.value) > int(sym2.value)
-        elif sym1.type == 'float':
-            result = sym1.float_value() > sym2.float_value()
-        elif sym1.type == 'bool':
-            if sym1.value == 'true' and sym2.value == 'false':
-                result = True
-            else:
-                result = False
-        elif sym1.type == 'string':
-            result = sym1.value > sym2.value
-
-        result = str(result).lower()
-
-        var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'bool', result)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.GT, ['int', 'float', 'string', 'bool'])
+        self.update_var_in_args(ctx, 'bool', result)
         return
 
     def eq(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        if sym1.type == 'nil' or sym2.type == 'nil':
-            var = self.args[0].value.split('@')
-            if sym1.type == 'nil' and sym2.type != 'nil' or sym1.type != 'nil' and sym2.type == 'nil':
-                ctx.set_variable(var[0], var[1], 'bool', 'false')
-            else:
-                ctx.set_variable(var[0], var[1], 'bool', 'true')
-            return
-
-        if sym1.type != sym2.type:
-            ctx.error('EQ only accepts parameters with equal types.')
-            exit(ExitCode.BAD_OPERAND_TYPE.value)
-
-        TypeChecker.full_check(ctx, self.opcode, sym1, [sym1.type])
-        TypeChecker.full_check(ctx, self.opcode, sym2, [sym2.type])
-
-        if sym1.type == 'int':
-            result = int(sym1.value) == int(sym2.value)
-        elif sym1.type == 'float':
-            result = sym1.float_value() == sym2.float_value()
-        else:
-            result = sym1.value == sym2.value
-
-        result = str(result).lower()
-
-        var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'bool', result)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        self.update_var_in_args(ctx, 'bool', result)
         return
 
     def exec_and(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['bool'])
-        TypeChecker.full_check(ctx, self.opcode, sym2, ['bool'])
-
-        result = sym1.value == 'true' and sym2.value == 'true'
-        result = str(result).lower()
-
-        var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'bool', result)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.AND, ['bool'])
+        self.update_var_in_args(ctx, 'bool', result)
         return
 
     def exec_or(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['bool'])
-        TypeChecker.full_check(ctx, self.opcode, sym2, ['bool'])
-
-        result = sym1.value == 'true' or sym2.value == 'true'
-        result = str(result).lower()
-
-        var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'bool', result)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.OR, ['bool'])
+        self.update_var_in_args(ctx, 'bool', result)
         return
 
     def exec_not(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['bool'])
-
-        result = sym1.value != 'true'
-        result = str(result).lower()
-
-        var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'bool', result)
+        result = self.calc_logic(sym1, None, ctx, LogicType.NOT, ['bool'])
+        self.update_var_in_args(ctx, 'bool', result)
         return
 
     def int2char(self, ctx: Context):
