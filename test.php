@@ -183,10 +183,8 @@ function runParserAndInterpreter(string $test): array
     $xml = runParser($test);
     if ($xml['code'] != 0) {
         return [
-            'success' => false,
-            'message' => 'Parsing failed',
-            'expected' => 0,
-            'actual' => $xml['code']
+            'out' => '',
+            'code' => $xml['code']
         ];
     }
 
@@ -203,13 +201,11 @@ function runParserAndInterpreter(string $test): array
     return $out;
 }
 
-function compareExitCode(string $outExitCode, string $ref): array
+function compareExitCode(int $outExitCode, string $ref): array
 {
-    $fs = fopen($ref, 'r');
-    $expected_ec = (int)fread($fs, 8);
-    fclose($fs);
+    $expected_ec = readFileContent($ref);
 
-    if ($expected_ec == $outExitCode)
+    if ((int) $expected_ec == (int) $outExitCode)
         return ['success' => true];
     else
         return [
@@ -371,7 +367,7 @@ function generateHTML(array $results): string
 
             $html .= "<p class=\"header\">Output:</p>";
 
-            if (key_exists('difference', $results)) {
+            if (key_exists('difference', $result)) {
                 $difference = $result['difference'];
                 $html .= "<p class=\"header\">Difference</p>
         <textarea readonly>$difference</textarea>";
