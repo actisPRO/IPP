@@ -12,6 +12,7 @@ enum ExitCode: int
 {
     case BAD_ARGUMENT = 10;
     case BAD_PATH = 41;
+    case INTERNAL_ERROR = 99;
 }
 
 function error(ExitCode $exitCode, string $message)
@@ -280,29 +281,39 @@ function runTest(string $path): array {
     return $result;
 }
 
-parseArgs();
-$tests = findTestsInFolder($directory);
+function main() {
+    global $directory;
 
-$testCase = 0;
-$failed = 0;
-foreach ($tests as $test) {
-    $testCase += 1;
-    $res = runTest($test);
+    parseArgs();
+    $tests = findTestsInFolder($directory);
 
-    if ($res['success']) {
-        echo "Test case #$testCase ($test): success.\n";
-    } else {
-        $reason = $res['message'];
-        $expected = $res['expected'];
-        $actual = $res['actual'];
+    $testCase = 0;
+    $failed = 0;
+    foreach ($tests as $test) {
+        $testCase += 1;
+        $res = runTest($test);
 
-        echo "Test case #$testCase ($test): fail. Reason: $reason.\n";
-        echo "Expected:\n$expected\n\n";
-        echo "Received:\n$actual\n";
+        if ($res['success']) {
+            echo "Test case #$testCase ($test): success.\n";
+        } else {
+            $reason = $res['message'];
+            $expected = $res['expected'];
+            $actual = $res['actual'];
 
-        $failed += 1;
+            echo "Test case #$testCase ($test): fail. Reason: $reason.\n";
+            echo "Expected:\n$expected\n\n";
+            echo "Received:\n$actual\n";
+
+            $failed += 1;
+        }
     }
+
+    $successful = $testCase - $failed;
+    echo "Total tests: $testCase. Successful: $successful. Failed: $failed.\n";
 }
 
-$successful = $testCase - $failed;
-echo "Total tests: $testCase. Successful: $successful. Failed: $failed.\n";
+try {
+    main();
+} catch (Error $err) {
+    error(ExitCode::INTERNAL_ERROR, "Unexpected error:\n$err");
+}
