@@ -282,7 +282,10 @@ function runTest(string $test): array {
 
     $result = compareExitCode($out['code'], "$test.rc");
     if (!$result['success'])
+    {
+        $result['path'] = $test;
         return $result;
+    }
 
     $fs = fopen("$test.temp.out", 'w');
     fwrite($fs, $out['out']);
@@ -299,7 +302,79 @@ function runTest(string $test): array {
             unlink("$test.delta");
     }
 
+    $result['path'] = $test;
     return $result;
+}
+
+function generateHTML(array $results): string {
+    $html = "<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <title>Testing results</title>
+    <style>
+        * {
+            font-family: Arial, serif;
+        }
+        main {
+            margin-top: 4%;
+            margin-left: 20%;
+        }
+        .test-result {
+            margin-bottom: 3%;
+            margin-left: 1%;
+            margin-right: 1%;
+        }
+        .test-result > p {
+            margin-top: 1%;
+        }
+        p.header {
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+        }
+        .fail {
+            color: red;
+        }
+        textarea {
+            width: 80%;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Test results</h1>";
+
+    $case = 1;
+    foreach ($results as $result) {
+        $html .= "<div class=\"test-result\">";
+
+        if ($result['success']) {
+            $path = $result['path'];
+            $html .= "<p class=\"header\">Test case #$case: <span class=\"success\">success</span></p>
+        <p>Path: $path</p>";
+        } else {
+            $path = $result['path'];
+            $message = $result['message'];
+            $difference = $result['difference'];
+
+            $html .= "<p class=\"header\">Test case #$case: <span class=\"fail\">fail</span></p>
+        <p>Path: $path</p>
+        <p><b>Message:</b> $message</p>
+        <p class=\"header\">Difference</p>
+        <textarea readonly>$difference</textarea>";
+        }
+
+        $html .= "</div>";
+        $case += 1;
+    }
+
+    $html .= "</main>
+</body>
+</html>";
+    return $html;
 }
 
 function main() {
@@ -307,30 +382,12 @@ function main() {
 
     parseArgs();
     $tests = findTestsInFolder($directory);
+    $results = [];
+    foreach ($tests as $test)
+        $results[] = runTest($test);
 
-    $testCase = 0;
-    $failed = 0;
-    foreach ($tests as $test) {
-        $testCase += 1;
-        $res = runTest($test);
-
-        if ($res['success']) {
-            echo "Test case #$testCase ($test): success.\n";
-        } else {
-            $reason = $res['message'];
-            $expected = $res['expected'];
-            $actual = $res['actual'];
-
-            echo "Test case #$testCase ($test): fail. Reason: $reason.\n";
-            echo "Expected:\n$expected\n\n";
-            echo "Received:\n$actual\n";
-
-            $failed += 1;
-        }
-    }
-
-    $successful = $testCase - $failed;
-    echo "Total tests: $testCase. Successful: $successful. Failed: $failed.\n";
+    $html = generateHTML($results);
+    echo "$html\n";
 }
 
 try {
