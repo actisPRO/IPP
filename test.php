@@ -145,7 +145,8 @@ function findTestsInFolder(string $directory): array
     return $result;
 }
 
-function runParser(string $test): array {
+function runParser(string $test): array
+{
     global $parseScript;
 
     $sh = "cat $test.src | php8.1 $parseScript"; // todo use merlin command
@@ -159,7 +160,8 @@ function runParser(string $test): array {
     );
 }
 
-function runInterpreter(string $test, string $source): array {
+function runInterpreter(string $test, string $source): array
+{
     global $intScript;
 
     $sh = "python3.8 $intScript --source=$source --input=$test.in"; // todo use merlin command
@@ -174,7 +176,8 @@ function runInterpreter(string $test, string $source): array {
     );
 }
 
-function runParserAndInterpreter(string $test): array {
+function runParserAndInterpreter(string $test): array
+{
     global $noclean;
 
     $xml = runParser($test);
@@ -200,9 +203,10 @@ function runParserAndInterpreter(string $test): array {
     return $out;
 }
 
-function compareExitCode(string $outExitCode, string $ref): array {
+function compareExitCode(string $outExitCode, string $ref): array
+{
     $fs = fopen($ref, 'r');
-    $expected_ec = (int) fread($fs, 8);
+    $expected_ec = (int)fread($fs, 8);
     fclose($fs);
 
     if ($expected_ec == $outExitCode)
@@ -210,13 +214,14 @@ function compareExitCode(string $outExitCode, string $ref): array {
     else
         return [
             'success' => false,
-            'message' => 'Wrong exit code',
+            'message' => "Wrong exit code. Expected $expected_ec but got $outExitCode",
             'expected' => $expected_ec,
             'actual' => $outExitCode
         ];
 }
 
-function readFile(string $file): string {
+function readFile(string $file): string
+{
     $fs = fopen($file, 'r');
     $res = "";
     while ($line = fgets($fs))
@@ -226,13 +231,13 @@ function readFile(string $file): string {
     return $res;
 }
 
-function compareXml(string $out, string $ref, string $delta): array {
+function compareXml(string $out, string $ref, string $delta): array
+{
     global $jExamXmlPath;
     $sh = "java -jar $jExamXmlPath/jexamxml.jar $out $ref $delta $jExamXmlPath/options";
 
     $result = exec($sh);
-    if (str_contains($result, "not identical"))
-    {
+    if (str_contains($result, "not identical")) {
         $outContent = readFile($out);
         $refContent = readFile($ref);
         $difference = readFile($delta);
@@ -244,12 +249,14 @@ function compareXml(string $out, string $ref, string $delta): array {
             'actual' => $outContent,
             'difference' => $difference
         ];
-    }
-    else
+    } else
         return ['success' => true];
-};
+}
 
-function compareText(string $out, string $ref): array {
+;
+
+function compareText(string $out, string $ref): array
+{
     $sh = "diff $out $ref";
 
     $result = exec($sh, $execOut);
@@ -265,12 +272,12 @@ function compareText(string $out, string $ref): array {
             'actual' => $outContent,
             'difference' => $difference
         ];
-    }
-    else
+    } else
         return ['success' => true];
 }
 
-function runTest(string $test): array {
+function runTest(string $test): array
+{
     global $parseOnly, $intOnly, $noclean;
 
     if ($parseOnly)
@@ -281,8 +288,7 @@ function runTest(string $test): array {
         $out = runParserAndInterpreter($test);
 
     $result = compareExitCode($out['code'], "$test.rc");
-    if (!$result['success'])
-    {
+    if (!$result['success']) {
         $result['path'] = $test;
         return $result;
     }
@@ -306,7 +312,8 @@ function runTest(string $test): array {
     return $result;
 }
 
-function generateHTML(array $results): string {
+function generateHTML(array $results): string
+{
     $html = "<!DOCTYPE html>
 <html lang=\"en\">
 <head>
@@ -362,9 +369,12 @@ function generateHTML(array $results): string {
 
             $html .= "<p class=\"header\">Test case #$case: <span class=\"fail\">fail</span></p>
         <p>Path: $path</p>
-        <p><b>Message:</b> $message</p>
-        <p class=\"header\">Difference</p>
+        <p><b>Message:</b> $message</p>";
+
+            if ($difference) {
+                $html .= "<p class=\"header\">Difference</p>
         <textarea readonly>$difference</textarea>";
+            }
         }
 
         $html .= "</div>";
@@ -377,7 +387,8 @@ function generateHTML(array $results): string {
     return $html;
 }
 
-function main() {
+function main()
+{
     global $directory;
 
     parseArgs();
