@@ -185,7 +185,7 @@ function printHelp()
  */
 function error(ErrorCode $code, string $message)
 {
-    fwrite(STDERR, $message);
+    fwrite(STDERR, $message . "\n");
     exit($code->value);
 }
 
@@ -419,16 +419,18 @@ function parseInput()
 
     while ($line = fgets(STDIN)) {
         $lineIndex += 1;
-        if ($line == '\n' || $line[0] == '#') continue;
+        if ($line[0] == '\n' || $line[0] == '#' || $line == '') continue;
 
         $trimmed = trim(trimComment($line));
         $instruction = preg_split('/\s+/', $trimmed);
+
+        if ($instruction[0] == '') continue;
 
         $instruction[0] = strtoupper($instruction[0]); // as opcode is case-insensitive
 
         if (!$header) {
             if ($instruction[0] == '.IPPCODE22') $header = true;
-            else error(ErrorCode::INVALID_HEADER, "Line $lineIndex: expected header .IPPcode22, but got: $line.");
+            else error(ErrorCode::INVALID_HEADER,    "Line $lineIndex: expected header .IPPcode22, but got: $line.");
 
             $xw->startElement('program');
             $xw->writeAttribute('language', 'IPPcode22');
