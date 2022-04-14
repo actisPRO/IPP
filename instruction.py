@@ -218,7 +218,7 @@ class Instruction:
         sym1 = ctx.stack.pop()
 
         result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
-        self.set_var(ctx, sym1.type, result)
+        ctx.stack.append(Variable(sym1.type, result))
         return
 
     def subs(self, ctx: Context):
@@ -227,7 +227,7 @@ class Instruction:
         sym1 = ctx.stack.pop()
 
         result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
-        self.set_var(ctx, sym1.type, result)
+        ctx.stack.append(Variable(sym1.type, result))
         return
 
     def muls(self, ctx: Context):
@@ -236,7 +236,7 @@ class Instruction:
         sym1 = ctx.stack.pop()
 
         result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
-        self.set_var(ctx, sym1.type, result)
+        ctx.stack.append(Variable(sym1.type, result))
         return
 
     def idivs(self, ctx: Context):
@@ -248,7 +248,7 @@ class Instruction:
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
         result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
-        self.set_var(ctx, sym1.type, result)
+        ctx.stack.append(Variable(sym1.type, result))
         return
 
     def lts(self, ctx: Context):
