@@ -167,9 +167,12 @@ class Instruction:
     # endregion
 
     # region Maths
-    def perform_operation(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType) -> int or float:
-        TypeChecker.full_check(ctx, self.opcode, var1, ['int', 'float'])
-        TypeChecker.full_check(ctx, self.opcode, var2, ['int', 'float'])
+    def perform_operation(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType, allowed_types=None) -> int or float:
+        if allowed_types is None:
+            allowed_types = ['int', 'float']
+
+        TypeChecker.full_check(ctx, self.opcode, var1, allowed_types)
+        TypeChecker.full_check(ctx, self.opcode, var2, allowed_types)
 
         if var1.type != var2.type:
             ctx.error(f"operands must have the same type. Current types: {var1.type} and {var2.type}")
@@ -226,111 +229,46 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
-
-        if sym1.type == 'int':
-            val1 = int(sym1.value)
-        else:
-            val1 = sym1.float_value()
-        if sym2.type == 'int':
-            val2 = int(sym2.value)
-        else:
-            val2 = sym2.float_value()
-        result = val1 - val2
-
-        if sym1.type == 'float' or sym2.type == 'float':
-            var_type = 'float'
-        else:
-            var_type = 'int'
+        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.SUB)
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], var_type, result)
-
+        ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
     def mul(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
-
-        if sym1.type == 'int':
-            val1 = int(sym1.value)
-        else:
-            val1 = sym1.float_value()
-        if sym2.type == 'int':
-            val2 = int(sym2.value)
-        else:
-            val2 = sym2.float_value()
-        result = val1 * val2
-
-        if sym1.type == 'float' or sym2.type == 'float':
-            var_type = 'float'
-        else:
-            var_type = 'int'
+        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.MUL)
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], var_type, result)
-
+        ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
     def idiv(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
-
-        if float(sym2.value) == 0:
-            ctx.error('Can\'t divde by zero.')
+        if sym2.float_value() == 0:
+            ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        if sym1.type == 'int':
-            val1 = int(sym1.value)
-        else:
-            val1 = sym1.float_value()
-        if sym2.type == 'int':
-            val2 = int(sym2.value)
-        else:
-            val2 = sym2.float_value()
-        result = val1 // val2
-
-        if sym1.type == 'float' or sym2.type == 'float':
-            var_type = 'float'
-        else:
-            var_type = 'int'
+        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.IDIV)
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], var_type, result)
-
+        ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
     def div(self, ctx):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-
-        TypeChecker.full_check(ctx, self.opcode, sym1, ['int', 'float'])
-        TypeChecker.full_check(ctx, self.opcode, sym2, ['int', 'float'])
-
-        if float(sym2.value) == 0:
-            ctx.error('Can\'t divde by zero.')
+        if sym2.float_value() == 0:
+            ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        if sym1.type == 'int':
-            val1 = int(sym1.value)
-        else:
-            val1 = sym1.float_value()
-        if sym2.type == 'int':
-            val2 = int(sym2.value)
-        else:
-            val2 = sym2.float_value()
-        result = val1 / val2
+        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.DIV, allowed_types=['float'])
 
         var = self.args[0].value.split('@')
-        ctx.set_variable(var[0], var[1], 'float', result)
-
+        ctx.set_variable(var[0], var[1], sym1.type, result)
         return
 
     def lt(self, ctx: Context):
