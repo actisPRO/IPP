@@ -178,7 +178,7 @@ class Instruction:
             ctx.error('FLOAT2INT accepts only float parameters.')
             exit(ExitCode.BAD_OPERAND_TYPE.value)
 
-        val = sym1.float_value()
+        val = int(sym1.float_value())
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], 'int', val)
@@ -491,6 +491,17 @@ class Instruction:
                 ctx.set_variable(var[0], var[1], 'int', data)
             except ValueError:
                 ctx.set_variable(var[0], var[1], 'nil', 'nil')
+        elif self.args[1].value == 'float':
+            f_input = ctx.input.readline()
+            try:
+                data = float(f_input)
+                ctx.set_variable(var[0], var[1], 'float', data)
+            except ValueError:
+                try:
+                    data = float.fromhex(f_input)
+                    ctx.set_variable(var[0], var[1], 'float', data)
+                except ValueError:
+                    ctx.set_variable(var[0], var[1], 'nil', 'nil')
         elif self.args[1].value == 'bool':
             data = ctx.input.readline().lower()
             if data == 'true' or data == 'true\n':
@@ -501,7 +512,7 @@ class Instruction:
             data = ctx.input.readline()
             ctx.set_variable(var[0], var[1], 'string', data)
         else:
-            ctx.error('READ only accepts integer, boolean and string types.')
+            ctx.error('READ only accepts integer, float, boolean and string types.')
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
         return

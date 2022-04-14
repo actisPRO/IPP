@@ -1,5 +1,3 @@
-import re
-
 class Variable:
     def __init__(self, var_type, value):
         self.type = var_type
@@ -12,7 +10,7 @@ class Variable:
         return f"{self.type}@{self.value}"
 
     def float_value(self) -> float:
-        if self.type != 'float':
+        if self.type != 'float' and self.type != 'int':
             raise ValueError()
 
         try:
