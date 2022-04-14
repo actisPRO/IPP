@@ -353,6 +353,7 @@ function runTest(string $test): array
     $result = compareExitCode($out['code'], "$test.rc");
     if (!$result['success'] || $out['code'] != 0) {
         $result['path'] = $test;
+        $result['output'] = $out['out'];
         return $result;
     }
 
@@ -409,10 +410,16 @@ function generateHTML(array $results): string
         <textarea readonly>$ref</textarea>";
             }
 
+            if (key_exists('output', $result)) {
+                $output = $result['output'];
+                $testInfo .= "<p class=\"header\">Output</p>
+        <textarea class=\"out\" readonly>$output</textarea>";
+            }
+
             if (key_exists('difference', $result)) {
                 $difference = $result['difference'];
                 $testInfo .= "<p class=\"header\">Difference</p>
-        <textarea readonly>$difference</textarea>";
+        <textarea class=\"diff\" readonly>$difference</textarea>";
             }
         }
 
@@ -454,9 +461,13 @@ function generateHTML(array $results): string
         .fail {
             color: red;
         }
-        textarea {
+        textarea.diff {
             width: 80%;
             height: 200px;
+        }
+        textarea.out {
+            width: 80%;
+            height: 75px;
         }
     </style>
 </head>
