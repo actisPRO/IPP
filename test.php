@@ -205,7 +205,7 @@ function compareExitCode(int $outExitCode, string $ref): array
 {
     $expected_ec = readFileContent($ref);
 
-    if ((int) $expected_ec == (int) $outExitCode)
+    if ((int) $expected_ec == $outExitCode)
         return ['success' => true];
     else
         return [
@@ -220,8 +220,8 @@ function readFileContent(string $file): string
 {
     $fs = fopen($file, 'r');
     $res = "";
-    while ($line = fgets($fs))
-        $res .= $line;
+    while (!feof($fs))
+        $res .= fgets($fs);
     fclose($fs);
 
     return $res;
@@ -283,7 +283,7 @@ function runTest(string $test): array
         $out = runParserAndInterpreter($test);
 
     $result = compareExitCode($out['code'], "$test.rc");
-    if (!$result['success']) {
+    if (!$result['success'] || $out['code'] != 0) {
         $result['path'] = $test;
         return $result;
     }
