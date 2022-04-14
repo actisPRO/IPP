@@ -116,14 +116,27 @@ class Interpreter:
                       file=sys.stderr)
                 exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
+            arg1 = False
+            arg2 = False
+            arg3 = False
             for arg in child:
-                if not (re.match(r"arg[123]", arg.tag)):
-                    print(f'ERROR: Expected {arg.tag} to be arg1, arg2 or arg3.', file=sys.stderr)
+                if arg.tag == 'arg1':
+                    arg1 = True
+                elif arg.tag == 'arg2':
+                    arg2 = True
+                elif arg.tag == 'arg3':
+                    arg3 = True
+                else:
+                    Interpreter.error(f'ERROR: Expected {arg.tag} to be arg1, arg2 or arg3.')
                     exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
+
                 arg_attrs = list(arg.attrib)
                 if not ('type' in arg_attrs):
-                    print(f'ERROR: {arg.tag} of instruction #{child.attrib["order"]} does not contain type info.',
-                          file=sys.stderr)
+                    Interpreter.error(f'ERROR: {arg.tag} of instruction #{child.attrib["order"]} does not contain type info.')
                     exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
+
+            if (arg2 and not arg1) or (arg3 and not arg2) or (arg3 and not arg1):
+                Interpreter.error('missing argument: found arg2 and arg1 does not exist, or found arg3 and arg2 or arg1 does not exist.')
+                exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
             expected_order += 1
