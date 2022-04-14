@@ -1,5 +1,4 @@
 import argparse
-import sys
 
 from exit_code import ExitCode
 from interpreter import Interpreter
@@ -23,6 +22,6 @@ if __name__ == '__main__':
         Interpreter.error("specified file was not found.")
         exit(ExitCode.READ_ERROR.value)
     except Exception as e:
-        Interpreter.error(f"Unexpected error:\n{e}")
+        Interpreter.error(f"Unexpected error of type {type(e)}:\n{e}")
         exit(ExitCode.INTERNAL_ERROR.value)
 
