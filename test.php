@@ -1,4 +1,5 @@
 <?php
+// Global config
 $directory = getcwd();
 $recursive = false;
 $parseScript = 'parse.php';
@@ -15,12 +16,20 @@ enum ExitCode: int
     case INTERNAL_ERROR = 99;
 }
 
+/**
+ * Prints the specified error messages and exits with the specified ExitCode
+ * @param ExitCode $exitCode
+ * @param string $message
+ */
 function error(ExitCode $exitCode, string $message)
 {
     fwrite(STDERR, "ERROR: " . $message);
     exit($exitCode->value);
 }
 
+/**
+ * Prints the help message
+ */
 function printHelp()
 {
     echo "IPPcode22 parser and interpreter tester\n\n"
@@ -35,6 +44,11 @@ function printHelp()
         . "\t--noclean\t\t\t\tIf set, temporary files won't be removed";
 }
 
+/**
+ * Splits the command-line argument by the "=" sign.
+ * @param string $arg Argument to split
+ * @return array Splitted argument
+ */
 function splitArg(string $arg): array
 {
     $res = preg_split('/=/', $arg);
@@ -44,6 +58,9 @@ function splitArg(string $arg): array
     return $res;
 }
 
+/**
+ * Reads command-line arguments, performs necessary checks and sets global properties.
+ */
 function parseArgs()
 {
     global $argc, $argv;
@@ -98,6 +115,11 @@ function parseArgs()
         error(ExitCode::BAD_PATH, "File $intScript does not exist.");
 }
 
+/**
+ * Creates missing test files if necessary
+ * @param string $path Path to the test folder
+ * @param string $testName Test name which will be used for the newly created files
+ */
 function checkAndCreateTestFiles(string $path, string $testName)
 {
     if (!file_exists("$path/$testName.in")) {
@@ -117,6 +139,11 @@ function checkAndCreateTestFiles(string $path, string $testName)
     }
 }
 
+/**
+ * Looks for *.src files in the specified folder
+ * @param string $directory Folder to search in
+ * @return array Test paths in format dir/testname without .src
+ */
 function findTestsInFolder(string $directory): array
 {
     global $recursive;
@@ -145,6 +172,11 @@ function findTestsInFolder(string $directory): array
     return $result;
 }
 
+/**
+ * Executes the parser on the specified test
+ * @param string $test Path to the test without extension
+ * @return array out - output text (including stderr), type - xml, code - parser exit code
+ */
 function runParser(string $test): array
 {
     global $parseScript;
@@ -160,6 +192,12 @@ function runParser(string $test): array
     );
 }
 
+/**
+ * Executes the interpreter on the specified test
+ * @param string $test Path to the test without extension
+ * @param string $source Path to the interpreter XML source file
+ * @return array out - output text (including stderr), type - xml, code - parser exit code
+ */
 function runInterpreter(string $test, string $source): array
 {
     global $intScript;
@@ -176,6 +214,11 @@ function runInterpreter(string $test, string $source): array
     );
 }
 
+/**
+ * Continuously executes the parser and the interpreter
+ * @param string $test Path to the test without extension
+ * @return array out - output text (including stderr), type - xml, code - parser exit code
+ */
 function runParserAndInterpreter(string $test): array
 {
     global $noclean;
@@ -201,6 +244,28 @@ function runParserAndInterpreter(string $test): array
     return $out;
 }
 
+/**
+ * Reads file to end
+ * @param string $file Path to file
+ * @return string File content
+ */
+function readFileContent(string $file): string
+{
+    $fs = fopen($file, 'r');
+    $res = "";
+    while (!feof($fs))
+        $res .= fgets($fs);
+    fclose($fs);
+
+    return $res;
+}
+
+/**
+ * Compares exit codes
+ * @param int $outExitCode Received exit code
+ * @param string $ref Reference file with the expected exit code
+ * @return array success - bool, message - if failed, info message, expected, actual
+ */
 function compareExitCode(int $outExitCode, string $ref): array
 {
     $expected_ec = readFileContent($ref);
@@ -216,17 +281,13 @@ function compareExitCode(int $outExitCode, string $ref): array
         ];
 }
 
-function readFileContent(string $file): string
-{
-    $fs = fopen($file, 'r');
-    $res = "";
-    while (!feof($fs))
-        $res .= fgets($fs);
-    fclose($fs);
-
-    return $res;
-}
-
+/**
+ * Compares XML files using JExamXML
+ * @param string $out Received output
+ * @param string $ref Reference file
+ * @param string $delta Difference file
+ * @return array success - bool, message - if failed, info message, expected, actual, difference
+ */
 function compareXml(string $out, string $ref, string $delta): array
 {
     global $jExamXmlPath;
@@ -249,7 +310,12 @@ function compareXml(string $out, string $ref, string $delta): array
         return ['success' => true];
 }
 
-
+/**
+ * Compares files using diff
+ * @param string $out Received output
+ * @param string $ref Reference file
+ * @return array success - bool, message - if failed, info message, expected, actual, difference
+ */
 function compareText(string $out, string $ref): array
 {
     $sh = "diff $out $ref";
@@ -271,6 +337,10 @@ function compareText(string $out, string $ref): array
         return ['success' => true];
 }
 
+/**
+ * @param string $test Path to the test without extension
+ * @return array success - bool, message - if failed, info message, expected, actual, difference
+ */
 function runTest(string $test): array
 {
     global $parseOnly, $intOnly, $noclean;
@@ -307,6 +377,11 @@ function runTest(string $test): array
     return $result;
 }
 
+/**
+ * Generates HTML
+ * @param array $results Test results
+ * @return string HTML
+ */
 function generateHTML(array $results): string
 {
     $html = "<!DOCTYPE html>
@@ -365,7 +440,7 @@ function generateHTML(array $results): string
         <p>Path: $path</p>
         <p><b>Message:</b> $message</p>";
 
-            $html .= "<p class=\"header\">Output:</p>";
+            //$html .= "<p class=\"header\">Output:</p>";
 
             if (key_exists('difference', $result)) {
                 $difference = $result['difference'];
