@@ -338,7 +338,7 @@ class Instruction:
         self.check_stack_len(ctx, 2)
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
-        label = self.args[0].value()
+        label = self.args[0].value
 
         result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
         if result:
@@ -349,7 +349,7 @@ class Instruction:
         self.check_stack_len(ctx, 2)
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
-        label = self.args[0].value()
+        label = self.args[0].value
 
         result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
         if not result:
@@ -694,7 +694,7 @@ class Instruction:
     def jumpifeq(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        label = self.args[0].value()
+        label = self.args[0].value
 
         result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
         if result:
@@ -704,7 +704,7 @@ class Instruction:
     def jumpifneq(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
-        label = self.args[0].value()
+        label = self.args[0].value
 
         result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
         if not result:
