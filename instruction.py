@@ -335,7 +335,7 @@ class Instruction:
         return
 
     def jumpifeqs(self, ctx: Context):
-        self.check_stack_len(ctx, 3)
+        self.check_stack_len(ctx, 2)
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
         label = self.args[0].value()
@@ -346,7 +346,7 @@ class Instruction:
         return
 
     def jumpifneqs(self, ctx: Context):
-        self.check_stack_len(ctx, 3)
+        self.check_stack_len(ctx, 2)
         sym2 = ctx.stack.pop()
         sym1 = ctx.stack.pop()
         label = self.args[0].value()
@@ -694,55 +694,21 @@ class Instruction:
     def jumpifeq(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
+        label = self.args[0].value()
 
-        if sym1.type == 'nil' or sym2.type == 'nil':
-            var = self.args[0].value.split('@')
-            if sym1.type == 'nil' and sym2.type != 'nil' or sym1.type != 'nil' and sym2.type == 'nil':
-                return  # do nothing
-            else:
-                ctx.jump_to_label(self.args[0].value)
-                return
-
-        if sym1.type != sym2.type:
-            ctx.error('JUMPIFEQ only accepts parameters with equal types.')
-            exit(ExitCode.BAD_OPERAND_TYPE.value)
-
-        if sym1.type == 'int':
-            if int(sym1.value) == int(sym2.value):
-                ctx.jump_to_label(self.args[0].value)
-        elif sym1.type == 'float':
-            if sym1.float_value() == sym2.float_value():
-                ctx.jump_to_label(self.args[0].value)
-        else:
-            if sym1.value == sym2.value:
-                ctx.jump_to_label(self.args[0].value)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        if result:
+            ctx.jump_to_label(label)
         return
 
     def jumpifneq(self, ctx: Context):
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
+        label = self.args[0].value()
 
-        if sym1.type == 'nil' or sym2.type == 'nil':
-            var = self.args[0].value.split('@')
-            if sym1.type == 'nil' and sym2.type != 'nil' or sym1.type != 'nil' and sym2.type == 'nil':
-                ctx.jump_to_label(self.args[0].value)
-                return
-            else:
-                return
-
-        if sym1.type != sym2.type:
-            ctx.error('JUMPIFNEQ only accepts parameters with equal types.')
-            exit(ExitCode.BAD_OPERAND_TYPE.value)
-
-        if sym1.type == 'int':
-            if int(sym1.value) != int(sym2.value):
-                ctx.jump_to_label(self.args[0].value)
-        elif sym1.type == 'float':
-            if sym1.float_value() != sym2.float_value():
-                ctx.jump_to_label(self.args[0].value)
-        else:
-            if sym1.value != sym2.value:
-                ctx.jump_to_label(self.args[0].value)
+        result = self.calc_logic(sym1, sym2, ctx, LogicType.EQ, ['int', 'float', 'string', 'bool', 'nil'])
+        if not result:
+            ctx.jump_to_label(label)
         return
 
     def exit(self, ctx: Context):
