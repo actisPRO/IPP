@@ -167,7 +167,7 @@ class Instruction:
     # endregion
 
     # region Maths
-    def perform_operation(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType, allowed_types=None) -> int or float:
+    def perform_arithmetics(self, var1: Variable, var2: Variable, ctx: Context, op_type: ArithmeticsType, allowed_types=None) -> int or float:
         if allowed_types is None:
             allowed_types = ['int', 'float']
 
@@ -219,7 +219,7 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.ADD)
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.ADD)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -229,7 +229,7 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.SUB)
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.SUB)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -239,7 +239,7 @@ class Instruction:
         sym1 = ctx.get_variable_from_arg(self.args[1])
         sym2 = ctx.get_variable_from_arg(self.args[2])
 
-        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.MUL)
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.MUL)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -252,7 +252,7 @@ class Instruction:
             ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.IDIV)
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.IDIV)
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
@@ -265,7 +265,7 @@ class Instruction:
             ctx.error("you can't divide by zero =(")
             exit(ExitCode.BAD_OPERAND_VALUE.value)
 
-        result = self.perform_operation(sym1, sym2, ctx, ArithmeticsType.DIV, allowed_types=['float'])
+        result = self.perform_arithmetics(sym1, sym2, ctx, ArithmeticsType.DIV, allowed_types=['float'])
 
         var = self.args[0].value.split('@')
         ctx.set_variable(var[0], var[1], sym1.type, result)
