@@ -36,6 +36,36 @@ class Instruction:
             self.pushs(ctx)
         elif self.opcode == "POPS":
             self.pops(ctx)
+        elif self.opcode == "CLEARS":
+            self.clears(ctx)
+        elif self.opcode == "ADDS":
+            self.adds(ctx)
+        elif self.opcode == "SUBS":
+            self.subs(ctx)
+        elif self.opcode == "MULS":
+            self.muls(ctx)
+        elif self.opcode == "IDIVS":
+            self.idivs(ctx)
+        elif self.opcode == "LTS":
+            self.lts(ctx)
+        elif self.opcode == "GTS":
+            self.gts(ctx)
+        elif self.opcode == "EQS":
+            self.eqs(ctx)
+        elif self.opcode == "ANDS":
+            self.ands(ctx)
+        elif self.opcode == "ORS":
+            self.ors(ctx)
+        elif self.opcode == "NOTS":
+            self.nots(ctx)
+        elif self.opcode == "INT2CHARS":
+            self.int2chars(ctx)
+        elif self.opcode == "STRI2INTS":
+            self.stri2ints(ctx)
+        elif self.opcode == "JUMPIFEQS":
+            self.jumpifeqs(ctx)
+        elif self.opcode == "JUMPIFNEQS":
+            self.jumpifneqs(ctx)
         elif self.opcode == 'INT2FLOAT':
             self.int2float(ctx)
         elif self.opcode == 'FLOAT2INT':
@@ -174,6 +204,52 @@ class Instruction:
         ctx.set_variable(var_data[0], var_data[1], var.type, var.value)
 
         return
+
+    def clears(self, ctx: Context):
+        return
+
+    def adds(self, ctx: Context):
+        return
+
+    def subs(self, ctx: Context):
+        return
+
+    def muls(self, ctx: Context):
+        return
+
+    def idivs(self, ctx: Context):
+        return
+
+    def lts(self, ctx: Context):
+        return
+
+    def gts(self, ctx: Context):
+        return
+
+    def eqs(self, ctx: Context):
+        return
+
+    def ands(self, ctx: Context):
+        return
+
+    def ors(self, ctx: Context):
+        return
+
+    def nots(self, ctx: Context):
+        return
+
+    def int2chars(self, ctx: Context):
+        return
+
+    def stri2ints(self, ctx: Context):
+        return
+
+    def jumpifeqs(self, ctx: Context):
+        return
+
+    def jumpifneqs(self, ctx: Context):
+        return
+
     # endregion
 
     # region Maths
