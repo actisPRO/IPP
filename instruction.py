@@ -206,6 +206,7 @@ class Instruction:
         return
 
     def clears(self, ctx: Context):
+        ctx.stack = []
         return
 
     def adds(self, ctx: Context):
