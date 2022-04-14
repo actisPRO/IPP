@@ -149,9 +149,9 @@ function runParser(string $test): array
 {
     global $parseScript;
 
-    $sh = "cat $test.src | php8.1 $parseScript"; // todo use merlin command
+    $sh = "cat $test.src | php8.1 $parseScript 2>&1";
     $output = [];
-    $exitCode = 0;
+
     exec($sh, $output, $exitCode);
     return array(
         'out' => implode("\n", $output),
@@ -164,7 +164,7 @@ function runInterpreter(string $test, string $source): array
 {
     global $intScript;
 
-    $sh = "python3.8 $intScript --source=$source --input=$test.in"; // todo use merlin command
+    $sh = "python3.8 $intScript --source=$source --input=$test.in 2>&1";
     $output = [];
     $exitCode = 0;
 
@@ -220,7 +220,7 @@ function compareExitCode(string $outExitCode, string $ref): array
         ];
 }
 
-function readFile(string $file): string
+function readFileContent(string $file): string
 {
     $fs = fopen($file, 'r');
     $res = "";
@@ -238,9 +238,9 @@ function compareXml(string $out, string $ref, string $delta): array
 
     $result = exec($sh, result_code: $resultCode);
     if ($resultCode != 0) {
-        $outContent = readFile($out);
-        $refContent = readFile($ref);
-        $difference = readFile($delta);
+        $outContent = readFileContent($out);
+        $refContent = readFileContent($ref);
+        $difference = readFileContent($delta);
 
         return [
             'success' => false,
@@ -253,7 +253,6 @@ function compareXml(string $out, string $ref, string $delta): array
         return ['success' => true];
 }
 
-;
 
 function compareText(string $out, string $ref): array
 {
@@ -262,8 +261,8 @@ function compareText(string $out, string $ref): array
     $result = exec($sh, $execOut);
     $difference = implode("\n", $execOut);
     if ($result != '') {
-        $outContent = readFile($out);
-        $refContent = readFile($ref);
+        $outContent = readFileContent($out);
+        $refContent = readFileContent($ref);
 
         return [
             'success' => false,
@@ -365,13 +364,15 @@ function generateHTML(array $results): string
         } else {
             $path = $result['path'];
             $message = $result['message'];
-            $difference = $result['difference'];
 
             $html .= "<p class=\"header\">Test case #$case: <span class=\"fail\">fail</span></p>
         <p>Path: $path</p>
         <p><b>Message:</b> $message</p>";
 
-            if ($difference) {
+            $html .= "<p class=\"header\">Output:</p>";
+
+            if (key_exists('difference', $results)) {
+                $difference = $result['difference'];
                 $html .= "<p class=\"header\">Difference</p>
         <textarea readonly>$difference</textarea>";
             }
