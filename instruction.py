@@ -101,9 +101,9 @@ class Instruction:
         self.update_stats(ctx)
 
     def update_stats(self, ctx: Context):
-        if [self.opcode, self.order] not in ctx.stats.hot.keys():
-            ctx.stats.hot[[self.opcode, self.order]] = 0
-        ctx.stats.hot[[self.opcode, self.order]] += 1
+        if (self.opcode, self.order) not in ctx.stats.hot.keys():
+            ctx.stats.hot[(self.opcode, self.order)] = 0
+        ctx.stats.hot[(self.opcode, self.order)] += 1
 
         if self.opcode != 'DPRINT' and self.opcode != 'LABEL' and self.opcode != 'BREAK':
             ctx.stats.insts += 1
