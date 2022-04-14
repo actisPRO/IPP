@@ -156,7 +156,7 @@ function findTestsInFolder(string $directory): array
     $result = [];
     foreach ($content as $item) {
         if ($item == '.' or $item == '..') continue;
-        else if (is_dir($item) && $recursive) {
+        else if (is_dir($directory . '/' . $item) && $recursive) {
             $tests = findTestsInFolder($directory . '/' . $item);
             foreach ($tests as $test)
                 $result[] = $test;
