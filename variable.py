@@ -5,6 +5,11 @@ class Variable:
 
         if self.type == 'string' and self.value is None:
             self.value = ''
+        elif self.type == 'bool' and type(self.value) is bool:
+            if self.value:
+                self.value = 'true'
+            else:
+                self.value = 'false'
 
     def __str__(self):
         return f"{self.type}@{self.value}"
