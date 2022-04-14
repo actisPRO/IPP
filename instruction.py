@@ -120,7 +120,7 @@ class Instruction:
     def popframe(self, ctx: Context):
         if len(ctx.LFs) == 0:
             ctx.error('local frame stack is empty.')
-            exit(ExitCode.MISSING_VALUE.value)
+            exit(ExitCode.UNDEFINED_FRAME.value)
 
         ctx.TF = ctx.LFs.pop()
         return
