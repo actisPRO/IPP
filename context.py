@@ -56,7 +56,7 @@ class Context:
 
             if name not in self.LFs[-1].keys():
                 self.error(f'variable {name} is not defined in the local frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
+                exit(ExitCode.UNDEFINED_VARIABLE.value)
 
             if self.LFs[-1][name].type is None:
                 self.error(f'variable {name} is declared but undefined.')
@@ -70,7 +70,7 @@ class Context:
 
             if name not in self.TF.keys():
                 self.error(f'variable {name} is not defined in the temporary frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
+                exit(ExitCode.UNDEFINED_VARIABLE.value)
 
             if self.TF[name].type is None:
                 self.error(f'variable {name} is declared but is not defined.')
@@ -127,7 +127,7 @@ class Context:
         if frame == 'GF':
             if name not in self.GF.keys():
                 self.error(f'variable {name} is not defined in the global frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
+                exit(ExitCode.UNDEFINED_VARIABLE.value)
 
             self.GF[name] = var
         elif frame == 'LF':
@@ -137,7 +137,7 @@ class Context:
 
             if name not in self.LFs[-1].keys():
                 self.error(f'variable {name} is not defined in the local frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
+                exit(ExitCode.UNDEFINED_VARIABLE.value)
 
             self.LFs[-1][name] = var
         elif frame == 'TF':
@@ -147,7 +147,7 @@ class Context:
 
             if name not in self.TF.keys():
                 self.error(f'variable {name} is not defined in the temporary frame.')
-                exit(ExitCode.SEMANTIC_ERROR.value)
+                exit(ExitCode.UNDEFINED_VARIABLE.value)
 
             self.TF[name] = var
 
