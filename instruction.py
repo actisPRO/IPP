@@ -131,7 +131,7 @@ class Instruction:
         return
 
     def call(self, ctx: Context):
-        ctx.calls.append(self.order)
+        ctx.calls.append(self.order - 1)
         ctx.jump_to_label(self.args[0].value)
         return
 
@@ -509,7 +509,7 @@ class Instruction:
             else:
                 ctx.set_variable(var[0], var[1], 'bool', 'false')
         elif self.args[1].value == 'string':
-            data = ctx.input.readline()
+            data = ctx.input.readline().rstrip('\n')
             ctx.set_variable(var[0], var[1], 'string', data)
         else:
             ctx.error('READ only accepts integer, float, boolean and string types.')
