@@ -91,6 +91,9 @@ class Instruction:
             self.dprint(ctx)
         elif self.opcode == "BREAK":
             self.exec_break(ctx)
+        else:
+            ctx.error(f'unknown opcode {self.opcode}.')
+            exit(ExitCode.UNEXPECTED_XML_STRUCTURE.value)
 
     def move(self, ctx: Context):
         sym = ctx.get_variable_from_arg(self.args[1])
