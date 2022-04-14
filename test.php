@@ -391,7 +391,7 @@ function generateHTML(array $results): string
         if ($result['success']) {
             $path = $result['path'];
             $testInfo .= "<p class=\"header\">Test case #$case: <span class=\"success\">success</span></p>
-        <p>Path: $path</p>";
+        <p><b>Path:</b> $path</p>";
         } else {
             $failed += 1;
             $path = $result['path'];
